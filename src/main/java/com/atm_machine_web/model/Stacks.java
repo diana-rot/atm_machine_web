@@ -18,7 +18,7 @@ public class Stacks {
     private Long stackIdNote;
     @Column(name = "count")
     Integer count;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "note")
     Notes note;
 

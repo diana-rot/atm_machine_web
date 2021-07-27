@@ -18,7 +18,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     TransactionsRepository transactionsRepository;
     @Override
     public Transactions findTransactionsByAccountId(Accounts accountId) {
-        return transactionsRepository.findTransactionsByAccountId(accountId);
+        return transactionsRepository.findFirstTransactionsByAccountId(accountId);
     }
 
     @Override
@@ -29,6 +29,11 @@ public class TransactionsServiceImpl implements TransactionsService {
     @Override
     public Transactions save(Transactions newTransaction) {
        return transactionsRepository.save(newTransaction);
+    }
+
+    @Override
+    public List<Transactions> findTransactionsByAccountIdOrderByTransactionId(Accounts accountsFromDb) {
+        return transactionsRepository. findTransactionsByAccountIdOrderByTransactionId( accountsFromDb) ;
     }
 
 

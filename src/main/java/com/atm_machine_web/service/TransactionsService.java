@@ -11,4 +11,5 @@ public interface TransactionsService {
     Transactions findTransactionsByDate(LocalDate date);
     Transactions save(Transactions newTransaction);
 
+    List<Transactions> findTransactionsByAccountIdOrderByTransactionId(Accounts accountsFromDb);
 }

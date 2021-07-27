@@ -1,5 +1,7 @@
 package com.atm_machine_web.model;
 
+import org.hibernate.annotations.Fetch;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.*;
@@ -15,12 +17,12 @@ public class Transactions {
     Accounts accountId;
     @Column(name = "date")
     LocalDate date;
-    @OneToMany(cascade = {CascadeType.ALL})
+    @OneToMany(cascade = {CascadeType.ALL},
+    fetch = FetchType.EAGER)
     List<Stacks> stacks;
     boolean stackInitialized;
 
-    public Transactions(Long transactionId, Accounts accountId, LocalDate date) {
-        this.transactionId = transactionId;
+    public Transactions( Accounts accountId, LocalDate date) {
         this.accountId = accountId;
         this.date = date;
         stackInitialized = false;
@@ -92,7 +94,7 @@ public class Transactions {
         return message;
     }
 
-    public StringBuilder countWithdraw(Integer sum, List<Stacks> stacks) {
+    public StringBuilder countWithdraw(Integer sum) {
         Integer restValueNote;
         if (stackInitialized == false) {
             this.stacks = new ArrayList<>();
@@ -162,13 +164,12 @@ public class Transactions {
 
 
     public StringBuilder refillSumForNote(Notes note, Integer sum) {
-        Long id_note = 1L;
+
         StringBuilder newString = new StringBuilder("is ok");
         if (stackInitialized == false) {
             stacks = new ArrayList<>();
             stackInitialized = true;
             stacks.add(new Stacks( sum, note));
-            id_note += 1;
             newString.append(note.toString() + " " + sum);
             return newString;
         }
@@ -180,7 +181,6 @@ public class Transactions {
 
             } else {
                 stacks.add(new Stacks( sum, note));
-                id_note += 1;
                 newString.append(stack.getNote().toString() + " " + sum);
             }
         }

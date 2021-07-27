@@ -38,7 +38,7 @@ public class AtmController {
             Float sold = accountsFromDb.getSold();
            // Transactions oldTr = transactionsService.findTransactionsByAccountId(accountsFromDb);
 
-            Transactions newTransaction = new Transactions(1L, accountsFromDb, LocalDate.now());
+            Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now());
             List<Notes> notes=  notesService.findAll();
             StringBuilder newString = new StringBuilder();
             newString.append(newTransaction.refillSumForNotes(notes, count));
@@ -62,11 +62,7 @@ public class AtmController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
         }else {
             Float sold = accountsFromDb.getSold();
-            Transactions oldTr = transactionsService.findTransactionsByAccountId(accountsFromDb);
-            Long newIdTr = 1L;
-            newIdTr += 1;
-            Transactions newTransaction = new Transactions(newIdTr, accountsFromDb, LocalDate.now());
-
+            Transactions newTransaction = new Transactions( accountsFromDb, LocalDate.now());
             Notes note = notesService.findValueByType("Leu_100");
             StringBuilder newString = new StringBuilder();
             newString.append(newTransaction.refillSumForNote(note, sum));
@@ -88,14 +84,20 @@ public class AtmController {
        }else{
            Float sold = accountsFromDb.getSold();
            if(sold > sum){
-               Transactions newTransaction = new Transactions(2L, accountsFromDb,LocalDate.now());
-                Transactions oldTr = transactionsService.findTransactionsByAccountId(accountsFromDb);
-               List<Stacks> stacks = oldTr.getStacks();
-               StringBuilder message =  newTransaction.countWithdraw(sum,stacks);
+               Transactions oldTransaction = transactionsService.findTransactionsByAccountId(accountsFromDb);
+
+               Transactions newTransaction = new Transactions(accountsFromDb,LocalDate.now());
+               newTransaction.setStacks(oldTransaction.getStacks());
+               List<Stacks> stacks =newTransaction.getStacks();
+
+
+//               List<Transactions>  tr = transactionsService.findTransactionsByAccountIdOrderByTransactionId(accountsFromDb);
+
+               StringBuilder message =  newTransaction.countWithdraw(sum);
                sold = sold - sum;
                accountsFromDb.setSold(sold);
                transactionsService.save(newTransaction);
-               return ResponseEntity.status(HttpStatus.OK).body(message);
+               return ResponseEntity.status(HttpStatus.OK).body(stacks);
            }else{
                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient funds! Check your sold");
            }
