@@ -1,17 +1,140 @@
 package com.atm_machine_web.controller;
-
-import com.atm_machine_web.entity.Atm;
+import com.atm_machine_web.model.*;
+import com.atm_machine_web.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.atm_machine_web.entity.Atm;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 public class AtmController {
     @Autowired
     Atm atm;
+    @Autowired
+    UserService userService;
+    @Autowired
+    AccountsService accountsService;
+    @Autowired
+    TransactionsService transactionsService;
+    @Autowired
+    StacksService stacksService;
+    @Autowired
+    NotesService notesService;
+
+    @PostMapping("/refill_notes")
+    public ResponseEntity refillNotes(@RequestBody User owner,
+                                     @RequestParam Integer count) {
+
+
+        Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
+
+        if(accountsFromDb == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
+        }else {
+            Float sold = accountsFromDb.getSold();
+           // Transactions oldTr = transactionsService.findTransactionsByAccountId(accountsFromDb);
+
+            Transactions newTransaction = new Transactions(1L, accountsFromDb, LocalDate.now());
+            List<Notes> notes=  notesService.findAll();
+            StringBuilder newString = new StringBuilder();
+            newString.append(newTransaction.refillSumForNotes(notes, count));
+
+//            accountsFromDb.setSold(sold);
+//            newString.append("sold is " + sold);
+            transactionsService.save(newTransaction);
+            return ResponseEntity.status(HttpStatus.OK).body(newString);
+        }
+
+
+    }
+    @PostMapping("/refill_note")
+    public ResponseEntity refillNote(@RequestBody User owner,
+                                         @RequestParam Integer sum) {
+
+
+        Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
+
+        if(accountsFromDb == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
+        }else {
+            Float sold = accountsFromDb.getSold();
+            Transactions oldTr = transactionsService.findTransactionsByAccountId(accountsFromDb);
+            Long newIdTr = 1L;
+            newIdTr += 1;
+            Transactions newTransaction = new Transactions(newIdTr, accountsFromDb, LocalDate.now());
+
+            Notes note = notesService.findValueByType("Leu_100");
+            StringBuilder newString = new StringBuilder();
+            newString.append(newTransaction.refillSumForNote(note, sum));
+            sold = sold + sum;
+            accountsFromDb.setSold(sold);
+            newString.append("sold is " + sold);
+            transactionsService.save(newTransaction);
+            return ResponseEntity.status(HttpStatus.OK).body(newString);
+        }
+
+
+    }
+
+@PostMapping("/withdraw")
+    public ResponseEntity withdraw(Integer sum, @RequestBody User owner) {
+       Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
+       if(accountsFromDb == null){
+           return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
+       }else{
+           Float sold = accountsFromDb.getSold();
+           if(sold > sum){
+               Transactions newTransaction = new Transactions(2L, accountsFromDb,LocalDate.now());
+                Transactions oldTr = transactionsService.findTransactionsByAccountId(accountsFromDb);
+               List<Stacks> stacks = oldTr.getStacks();
+               StringBuilder message =  newTransaction.countWithdraw(sum,stacks);
+               sold = sold - sum;
+               accountsFromDb.setSold(sold);
+               transactionsService.save(newTransaction);
+               return ResponseEntity.status(HttpStatus.OK).body(message);
+           }else{
+               return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient funds! Check your sold");
+           }
+
+       }
+
+    }
+
+    @GetMapping("/show_stacks")
+    public String showStacks(@RequestBody Notes newNote) {
+        return stacksService.findAllByNote(newNote).toString();
+    }
+
+    @GetMapping("/show_notes")
+    public String showNotes() {
+        return notesService.findAll().toString();
+    }
+    @PostMapping("/add_account")
+    public ResponseEntity addAccount(@RequestBody Accounts newAccount) {
+        Accounts accountsFromDb = accountsService.findAccountsByOwner(newAccount.getOwner());
+        if( accountsFromDb == null){
+            Accounts addedAccount = accountsService.save(newAccount);
+            return ResponseEntity.status(HttpStatus.OK).body(addedAccount);
+        }else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This account already exists!");
+        }
+    }
+
+    @PostMapping("/add_user")
+    public ResponseEntity addUser(@RequestBody User newUser) {
+        User userFromDb = userService.findUserByUserName(newUser.getUserName());
+        if(userFromDb == null){
+            User addedUser = userService.save(newUser);
+            return ResponseEntity.status(HttpStatus.OK).body(addedUser);
+        }else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This username already exists!");
+        }
+    }
+
 
     @GetMapping
     public String welcome() {
@@ -32,29 +155,6 @@ public class AtmController {
         availableNotes.append(System.getProperty("line.separator"));
         availableNotes.append(atm.getNoteFrequency().toString()).append("with the frequencies");
         return availableNotes;
-    }
-
-    @PostMapping("/refill")
-    public ResponseEntity<String> refill(@RequestBody List<Integer> noteFrequency,
-                                         @RequestParam boolean isAdmin) {
-        if (!isAdmin) {
-            return new ResponseEntity<>("Unauthorized admin", HttpStatus.UNAUTHORIZED);
-        }
-        atm.addMoney(noteFrequency);
-        return new ResponseEntity<>(atm.getNoteFrequency().toString(), HttpStatus.OK);
-
-    }
-
-    @PostMapping("/withdraw")
-    public StringBuilder withdraw(@RequestParam int sum) {
-        try {
-            return atm.countCurrency(sum, 5, atm.getNotes(), atm.getNoteFrequency());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
 

@@ -1,5 +1,6 @@
 package com.atm_machine_web.entity;
 
+import com.atm_machine_web.model.Notes;
 import com.atm_machine_web.notification.EmailNotification;
 import com.atm_machine_web.notification.Notification;
 import com.atm_machine_web.notification.SmsNotification;
@@ -9,17 +10,21 @@ import java.util.*;
 
 @Component
 public class Atm {
-    Map<Integer, Integer> mapNotesLimit = new HashMap<>();
+    //limita atmului
+    Map<Notes, Integer> mapNotesLimit = new HashMap<>();
+
     List<Integer> notes = new ArrayList<>();
     List<Integer> noteFrequency = new ArrayList<>();
     Integer nr_notes;
 
     private Atm() {
-        mapNotesLimit.put(100, 50);
-        mapNotesLimit.put(50, 50);
-        mapNotesLimit.put(10, 100);
-        mapNotesLimit.put(5, 100);
-        mapNotesLimit.put(1, 100);
+
+        mapNotesLimit.put(new Notes(1L,"LEU_100",100), 50);
+        mapNotesLimit.put(new Notes(2L,"LEU_50",50), 50);
+        mapNotesLimit.put(new Notes(3L,"LEU_10",10), 100);
+        mapNotesLimit.put(new Notes(4L,"LEU_5",5), 100);
+        mapNotesLimit.put(new Notes(5L,"LEU_1",1), 100);
+
         notes.add(100);
         notes.add(50);
         notes.add(10);
@@ -111,9 +116,7 @@ public class Atm {
     public void showIfAllert(Integer sum) {
 
 
-//        if (LeftNrofNotesfNotes(noteFrequency) == 0) {
-//            message = StockAlert.O_STOCK;
-//        } else {
+
         if (noteFrequency.get(0) <= PercentageOfSum(100, 10)) {
             (new SmsNotification(Notification.TypeNotification.Critical,
                     new StringBuilder("100 LEI bills under 10% of max"),new StringBuilder("345"))).printNotification();
