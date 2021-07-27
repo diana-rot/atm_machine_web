@@ -7,25 +7,21 @@ public class Accounts {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long accountId;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User owner;
+
     @Column(name = "sold", updatable = true)
     Float sold;
+
     @Column(name = "currency_type", nullable = false)
     private String currencyType;
 
     public Accounts() {
-
     }
 
-    private enum currency{
-        EURO,
-        RON,
-    }
-
-    public Accounts(Long accountId, User owner, Float sold, String currencyType) {
-        this.accountId = accountId;
+    public Accounts(User owner, Float sold, String currencyType) {
         this.owner = owner;
         this.sold = sold;
         this.currencyType = currencyType;

@@ -1,6 +1,6 @@
 package com.atm_machine_web.model;
 
-import org.hibernate.annotations.Fetch;
+
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -12,26 +12,149 @@ public class Transactions {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     Long transactionId;
+
     @ManyToOne
     @JoinColumn(name = "account_id")
     Accounts accountId;
+
     @Column(name = "date")
     LocalDate date;
+
     @OneToMany(cascade = {CascadeType.ALL},
-    fetch = FetchType.EAGER)
+            fetch = FetchType.EAGER)
     List<Stacks> stacks;
     boolean stackInitialized;
 
-    public Transactions( Accounts accountId, LocalDate date) {
+    public Transactions(Accounts accountId, LocalDate date) {
         this.accountId = accountId;
         this.date = date;
-        stackInitialized = false;
+       // stackInitialized = false;
 
     }
 
     public Transactions() {
 
     }
+
+    //AICI TB NEAPARAT REFACUTA!!!!
+    public StringBuilder countWithdraw(Integer sum) {
+        Integer restValueNote;
+        StringBuilder returnMessage = new StringBuilder("extrag : ");
+        if (stackInitialized == false) {
+            this.stacks = new ArrayList<>();
+            stackInitialized = true;
+            returnMessage.append("No money in stacks");
+        } else {
+            for (Stacks stack : stacks) {
+                Integer noteHolder = stack.getNote().getValue();
+                returnMessage.append("am intrat in for" + noteHolder.toString());
+
+                if (sum >= noteHolder) {
+                    returnMessage.append("+ suma e suficient de mare ca bancnota");
+                    restValueNote = sum / noteHolder;
+                    if (stack.getCount() - restValueNote > 0) {
+
+                        stack.setCount(sum / stack.getNote().getValue());
+                        sum = sum - stack.getCount() * stack.getNote().getValue();
+
+                    } else if (stack.getCount() > 0) {
+                        while (stack.getCount() != 0) {
+                            sum = sum - stack.getNote().getValue();
+                            stack.decreaseCount(1);
+
+                        }
+                    }
+                }
+            }
+        }
+        return returnMessage;
+
+    }
+
+    //generala cu tratat toate cazurile + dar poate fi utilizata si pentru urmatoarea
+    public void addNotesStacks( Notes note, Integer nrNotes) {
+
+        if (stackInitialized == false) {
+            stacks = new ArrayList<>();
+            stackInitialized = true;
+            stacks.add(new Stacks(note, nrNotes));
+
+
+        } else {
+            for (Stacks stack : stacks) {
+                if (stack.getNote().getType().equals(note.getType())) {
+                    stack.increaseCount(nrNotes);
+
+                } else {
+                    stacks.add(new Stacks(note, nrNotes));
+                }
+            }
+        }
+    }
+    //to be done
+
+    public StringBuilder updateStacks(List<Stacks> refilledStacks) {
+
+        StringBuilder testString = new StringBuilder("refilledStacks");
+        Integer sumAdded = 0;
+        Integer nrNotes = 0;
+        Integer valueCurrentNote = 0;
+        Notes updateNote;
+
+        if (stackInitialized == false) {
+            stacks = new ArrayList<>();
+            stackInitialized = true;
+            Integer nrNote = refilledStacks.get(0).getCount();
+            stacks.add(new Stacks(refilledStacks.get(0).getNote(),nrNote));
+        }else {
+            testString.append(stacks.toString());
+            for (Stacks otherStack : refilledStacks) {
+
+                nrNotes = otherStack.getCount();
+                valueCurrentNote = otherStack.getNote().getValue();
+                updateNote = otherStack.getNote();
+
+//            //addNotesStacks(this.stacks,otherStack.getNote(), nrNotes);
+            refillStackNote(updateNote,nrNotes);
+
+
+                sumAdded += nrNotes * valueCurrentNote;
+                testString.append(sumAdded + "this should be the return value");
+                testString.append("a new note" + otherStack.toString());
+                testString.append("\n");
+            }
+        }
+        return testString;
+
+    }
+
+
+    public StringBuilder refillStackNote(Notes note, Integer nrNotes) {
+
+        StringBuilder messageReturn = new StringBuilder("refillStackNote");
+        if (stackInitialized == false) {
+            stacks = new ArrayList<>();
+            stackInitialized = true;
+            stacks.add(new Stacks(note, nrNotes));
+            messageReturn.append("Am inserat pe primul if" + note.toString() + " " + nrNotes);
+
+        } else {
+            for (Stacks stack : stacks) {
+                if (stack.getNote().getType().equals(note.getType())) {
+                    stack.increaseCount(nrNotes);
+                    messageReturn.append("already here" + note.toString() + " " + nrNotes);
+
+                } else {
+                    stacks.add(new Stacks(note, nrNotes ));
+                    messageReturn.append(stack.getNote().toString() + " " + nrNotes);
+                }
+            }
+        }
+        return messageReturn;
+
+
+    }
+
 
     public Long getTransactionId() {
         return transactionId;
@@ -69,8 +192,6 @@ public class Transactions {
         stacks = new ArrayList<>();
     }
 
-
-
     @Override
     public String toString() {
         return "Transactions{" +
@@ -81,113 +202,6 @@ public class Transactions {
                 '}';
     }
 
-    public StringBuilder printCurrency(Integer sum) {
-        StringBuilder message = new StringBuilder();
-        message.append("Notes Count : ");
-        for (Stacks stack : stacks) {
-            if (stack.getCount() != 0) {
-                message.append(stacks.toString());
-                message.append(System.getProperty("line.separator"));
-            }
-        }
-
-        return message;
-    }
-
-    public StringBuilder countWithdraw(Integer sum) {
-        Integer restValueNote;
-        if (stackInitialized == false) {
-            this.stacks = new ArrayList<>();
-            stackInitialized = true;
-            StringBuilder newString = new StringBuilder("No money here to withdraw");
-            return newString;
-        }
-
-        for (Stacks stack : stacks) {
-            Integer noteHolder = stack.getNote().getValue();
-            if (sum >= noteHolder) {
-                restValueNote = sum / noteHolder;
-                if (stack.getCount() - restValueNote > 0) {
-
-                    stack.setCount(sum / stack.getNote().getValue());
-                    sum = sum - stack.getCount() * stack.getNote().getValue();
-
-
-                } else if (stack.getCount() > 0) {
-                    while (stack.getCount() != 0) {
-                        sum = sum - stack.getNote().getValue();
-                        stack.decreaseCount(1);
-
-                    }
-                }
-            }
-        }
-        return printCurrency(sum);
-    }
-
-
-    public void initStacks(List<Stacks> stacks, Notes note, Long id_note, Integer count) {
-        if (stackInitialized == false) {
-           stacks = new ArrayList<>();
-            stackInitialized = true;
-            this.stacks.add(new Stacks(count, note));
-
-
-        } else {
-            for (Stacks stack : stacks) {
-                if (stack.getNote().getType().equals(note.getType())) {
-                    stack.increaseCount(count);
-
-
-                } else {
-                    stacks.add(new Stacks( count, note));
-                    id_note += 1;
-
-                }
-
-
-            }
-        }
-    }
-
-    public StringBuilder refillSumForNotes(List<Notes> notes, Integer count) {
-
-        StringBuilder newString = new StringBuilder("is ok");
-        Integer totalSum = 0;
-        for (Notes note : notes) {
-            initStacks(this.stacks, note,note.getNoteId(), count);
-            totalSum += count * note.getValue();
-            newString.append(totalSum);
-        }
-        return newString;
-    }
-
-
-    public StringBuilder refillSumForNote(Notes note, Integer sum) {
-
-        StringBuilder newString = new StringBuilder("is ok");
-        if (stackInitialized == false) {
-            stacks = new ArrayList<>();
-            stackInitialized = true;
-            stacks.add(new Stacks( sum, note));
-            newString.append(note.toString() + " " + sum);
-            return newString;
-        }
-
-        for (Stacks stack : stacks) {
-            if (stack.getNote().getType().equals(note.getType())) {
-                stack.increaseCount(sum);
-                newString.append("already here" + note.toString() + " " + sum);
-
-            } else {
-                stacks.add(new Stacks( sum, note));
-                newString.append(stack.getNote().toString() + " " + sum);
-            }
-        }
-        return newString;
-
-
-    }
 }
 
 

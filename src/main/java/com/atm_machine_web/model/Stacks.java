@@ -1,30 +1,28 @@
 package com.atm_machine_web.model;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity(name = "Stacks")
 public class Stacks {
     @Id
-//    @SequenceGenerator(
-//            name = "stacks_sequence",
-//            sequenceName = "stacks_sequence",
-//            allocationSize = 1
-//    )
-//    @GeneratedValue(
-//            strategy = GenerationType.SEQUENCE,
-//            generator = "stacks_sequence")
-
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "stack_id", nullable = false)
     private Long stackIdNote;
     @Column(name = "count")
     Integer count;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "transactions")
+    List<Transactions> transactionsList;
+
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "note")
     Notes note;
 
 
-    public Stacks( Integer count, Notes note) {
-        //this.stackIdNote = stackIdNote;
+    public Stacks(Notes note, Integer count) {
+
         this.count = count;
         this.note = note;
     }
@@ -58,11 +56,11 @@ public class Stacks {
     }
 
     public Integer increaseCount(Integer newCount) {
-        return count + newCount;
+        return this.count + newCount;
     }
 
     public Integer decreaseCount(Integer newCount) {
-        return count - newCount;
+        return this.count - newCount;
     }
 
     @Override
