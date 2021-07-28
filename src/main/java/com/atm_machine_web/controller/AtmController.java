@@ -29,46 +29,31 @@ public class AtmController {
     @Autowired
     AtmService atmService;
 
-
+//refill notes sau deposition
     @PostMapping("/refill_notes")
     public ResponseEntity refillNotes(@RequestBody User owner) {
         // @RequestBody List<Stacks> stacksNotes
-        List<Stacks> stacksNotes = new ArrayList<>();
         List<Notes> notes = notesService.findAll();
-        for (Notes note : notes) {
-            stacksNotes.add(new Stacks(note, 5));
-        }
+        Integer nrNotes = 5; //test de modificat
 
         Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
         if (accountsFromDb == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
         } else {
-            Transactions oldTransaction = transactionsService.findTransactionsByAccountId(accountsFromDb);
             Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now());
-            StringBuilder testString = new StringBuilder("test de la refill din atm: ");
-
-            if (oldTransaction == null) {
-                //return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("du tr drwas!");
-                testString.append("am intrat pe batran egal cu nul");
-                testString.append(newTransaction.updateStacks(stacksNotes));
-
-            } else {
-                newTransaction.setStacks(oldTransaction.getStacks());
-                testString.append(newTransaction.updateStacks(stacksNotes));
-                List<Stacks> stacks = newTransaction.getStacks();
-                testString.append("sunt in else" + "control" + stacks.toString());
-            }
-//
-
+            StringBuilder testString = new StringBuilder("test de la refill lista din atm: ");
+            testString.append(accountsFromDb.updateStacks(notes,nrNotes));
             transactionsService.save(newTransaction);
             return ResponseEntity.status(HttpStatus.OK).body(testString);
-        }
-
+            }
 
     }
 
+    //cate un tip de bancnota, ideal ar fi sa cer username ul de la request param
+
     @PostMapping("/add_note")
     public ResponseEntity addNote(@RequestBody User owner,
+                                  @RequestParam String noteType,
                                   @RequestParam Integer nrNotes) {
 
 
@@ -77,30 +62,26 @@ public class AtmController {
         if (accountsFromDb == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
         } else {
-            Transactions oldTransaction = transactionsService.findTransactionsByAccountId(accountsFromDb);
+
             Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now());
-            Notes note = notesService.findValueByType("Leu_100"); //se va sterge
-            StringBuilder testString = new StringBuilder("test de la refill din atm: ");
+            Notes note = notesService.findValueByType(noteType); //se va sterge
 
-            if (oldTransaction == null) {
-                testString.append(newTransaction.refillStackNote(note, nrNotes));
-            } else {
-                newTransaction.setStacks(oldTransaction.getStacks());
-                testString.append(newTransaction.refillStackNote(note, nrNotes));
-                List<Stacks> stacks = newTransaction.getStacks();
-                testString.append("sunt in else" + "control" + stacks.toString());
-            }
+            StringBuilder testString = new StringBuilder("test de la refill din atm: "); // param in functie
 
+            testString.append(accountsFromDb.refillStackNote(note, nrNotes));
+
+//            List<Stacks> stacks = accountsFromDb.getStacks();
+//            testString.append("sunt in else" + "control" + stacks.toString());
             Float sold = accountsFromDb.getSold();
             sold = sold + note.getValue() * nrNotes;
             accountsFromDb.setSold(sold);
             testString.append("sold is " + sold);
             transactionsService.save(newTransaction);
             return ResponseEntity.status(HttpStatus.OK).body(testString);
+            }
+
         }
 
-
-    }
 
     @PostMapping("/withdraw")
     public ResponseEntity withdraw(Integer sum, @RequestBody User owner) {
@@ -110,20 +91,16 @@ public class AtmController {
         } else {
             Float sold = accountsFromDb.getSold();
             if (sold > sum) {
-                Transactions oldTransaction = transactionsService.findTransactionsByAccountId(accountsFromDb);
 
                 Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now());
-                newTransaction.setStacks(oldTransaction.getStacks());
-                List<Stacks> stacks = newTransaction.getStacks();
+                StringBuilder message = new StringBuilder();
+                message.append(accountsFromDb.countWithdraw(sum));
+                message.append(accountsFromDb.getStacks());
 
-
-//               List<Transactions>  tr = transactionsService.findTransactionsByAccountIdOrderByTransactionId(accountsFromDb);
-
-                StringBuilder message = newTransaction.countWithdraw(sum);
                 sold = sold - sum;
                 accountsFromDb.setSold(sold);
                 transactionsService.save(newTransaction);
-                return ResponseEntity.status(HttpStatus.OK).body(stacks);
+                return ResponseEntity.status(HttpStatus.OK).body(message);
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient funds! Check your sold");
             }

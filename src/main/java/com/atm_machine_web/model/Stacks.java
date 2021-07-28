@@ -55,12 +55,12 @@ public class Stacks {
         this.note = note;
     }
 
-    public Integer increaseCount(Integer newCount) {
-        return this.count + newCount;
+    public void increaseCount(Integer newCount) {
+       this.count =   this.count + newCount;
     }
 
-    public Integer decreaseCount(Integer newCount) {
-        return this.count - newCount;
+    public  void decreaseCount(Integer newCount) {
+        this.count =   this.count - newCount;
     }
 
     @Override
