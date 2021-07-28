@@ -82,6 +82,7 @@ public class Accounts {
         //aici tb sa fac sa dau lista direct
 
         if (stacks.isEmpty()) {
+
             stacks.add(new Stacks(availableNotes.get(0), nrNotes));//100
             stacks.add(new Stacks(availableNotes.get(1), nrNotes));//50
             stacks.add(new Stacks(availableNotes.get(2), nrNotes));//10
@@ -91,13 +92,20 @@ public class Accounts {
             testString.append("SE ADAUGA " + availableNotes.get(1).toString() + "de n ori" + nrNotes);
             testString.append("SE ADAUGA " + availableNotes.get(2).toString() + "de n ori" + nrNotes);
             testString.append("SE ADAUGA " + availableNotes.get(3).toString() + "de n ori" + nrNotes);
-
+            Float newsold = getSold() + nrNotes* (availableNotes.get(0).getValue()+
+            availableNotes.get(1).getValue()+
+                    availableNotes.get(2).getValue()+
+                    availableNotes.get(3).getValue()+
+                    availableNotes.get(4).getValue());
+            setSold(newsold);
         } else {
             testString.append(stacks.toString());
             for (Notes iteratorNote : availableNotes) {
                 for (Stacks stack : stacks) {
                     if (stack.getNote().getType().equals(iteratorNote.getType())) {
                         stack.increaseCount(nrNotes);
+                        Float newsold = getSold() + nrNotes*stack.getNote().getValue();
+                        setSold(newsold);
 
                     }
 
@@ -112,26 +120,48 @@ public class Accounts {
 
     //AICI TB NEAPARAT REFACUTA!!!!
     public StringBuilder countWithdraw(Integer sum) {
+        List<Integer> noteCounter = new ArrayList(5);
+        noteCounter.add(0);
+        noteCounter.add(0);
+        noteCounter.add(0);
+        noteCounter.add(0);
+        noteCounter.add(0);
+        noteCounter.add(0);
+
+
+
+
         Integer restValueNote;
-        StringBuilder returnMessage = new StringBuilder("extrag : ");
+        StringBuilder returnMessage = new StringBuilder("extrag : " +"\n");
+        int noteValue;
+        Integer index;
+
 
         for (Stacks stack : stacks) {
             Integer noteHolder = stack.getNote().getValue();
-            returnMessage.append("am intrat in for" + noteHolder.toString());
+            returnMessage.append("am intrat in for" + noteHolder.toString() + "\n");
 
             if (sum >= noteHolder) {
-                returnMessage.append("+ suma e suficient de mare ca bancnota");
+                index = stacks.indexOf(stack);
+                returnMessage.append("+ suma e suficient de mare");
                 restValueNote = sum / noteHolder;
-                returnMessage.append("restValue note" + sum);
-                if (stack.getCount() - restValueNote > 0) {
 
-                    stack.setCount(sum / stack.getNote().getValue());
-                    sum = sum - stack.getCount() * stack.getNote().getValue();
+                returnMessage.append("AICI CAT RAMANE restValue note" + sum + "\n");
+                if (stack.getCount() - restValueNote > 0) {
+                    noteCounter.set(index,restValueNote);
+                    noteValue = stack.getNote().getValue();
+                    sum = sum - noteCounter.get(index)* noteValue;
+                    stack.decreaseCount(noteCounter.get(index));
+                    //stack.setCount( noteCounter.get(index));
+
 
                 } else if (stack.getCount() > 0) {
+
                     while (stack.getCount() != 0) {
                         sum = sum - stack.getNote().getValue();
                         stack.decreaseCount(1);
+                        Integer element = noteCounter.get(index);
+                        noteCounter.set(index,element+1);
 
                     }
                 }

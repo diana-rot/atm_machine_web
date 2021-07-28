@@ -29,13 +29,11 @@ public class AtmController {
     @Autowired
     AtmService atmService;
 
-//refill notes sau deposition
+
     @PostMapping("/refill_notes")
-    public ResponseEntity refillNotes(@RequestBody User owner) {
+    public ResponseEntity refillNotes(@RequestBody User owner,@RequestParam Integer nrNotes) {
         // @RequestBody List<Stacks> stacksNotes
         List<Notes> notes = notesService.findAll();
-        Integer nrNotes = 5; //test de modificat
-
         Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
         if (accountsFromDb == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");

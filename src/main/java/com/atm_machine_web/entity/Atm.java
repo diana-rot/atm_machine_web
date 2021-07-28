@@ -111,6 +111,7 @@ public class Atm {
 //        int noteCounter[] = new int[5];
 //        Integer newNote;
 //        int index;
+
 //        for (Integer note : notes) {
 //            if (sum >= note) {
 //                newNote = sum / note;
