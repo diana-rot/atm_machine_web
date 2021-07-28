@@ -2,6 +2,7 @@ package com.atm_machine_web.model;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Entity(name = "Accounts")
@@ -14,7 +15,7 @@ public class Accounts {
     @JoinColumn(name = "user_id")
     private User owner;
 
-    @Column(name = "sold", updatable = true)
+    @Column(name = "sold")
     Float sold;
 
     @Column(name = "currency_type", nullable = false)
@@ -27,15 +28,6 @@ public class Accounts {
 
     public Accounts() {
     }
-
-    public List<Stacks> getStacks() {
-        return stacks;
-    }
-
-    public void setStacks(List<Stacks> stacks) {
-        this.stacks = stacks;
-    }
-
 
     public Accounts(User owner, Float sold, String currencyType) {
         this.owner = owner;
@@ -50,37 +42,40 @@ public class Accounts {
         StringBuilder messageReturn = new StringBuilder("refillStackNote");
         if (stacks.isEmpty()) {
             stacks.add(new Stacks(note, nrNotes));
-            messageReturn.append("Am inserat pe primul if o data tb sa apara si atat!!" + note.toString() + " " + nrNotes);
-
         } else {
-            messageReturn.append("de ce nu ma vrei");
             for (Stacks stack : stacks) {
                 if (stack.getNote().getType().equals(note.getType())) {
-                    // messageReturn("")
                     stack.increaseCount(nrNotes);
-                    messageReturn.append("already here" + note.toString() + " " + nrNotes);
-                    messageReturn.append("HAI SA AFLAM " + stack.toString() + "count" + stack.getCount());
+
                 }
-
-//                    stacks.add(new Stacks(note, nrNotes ));
-//                    messageReturn.append("aici e rez"+stack.getNote().toString() + " " + nrNotes);
-
             }
         }
         return messageReturn;
 
+    }
+    public StringBuilder messageAfterUpdateStacks(List<Notes> availableNotes, Integer nrNotes) {
+        StringBuilder returnMessage = new StringBuilder("Au fost adaugate bancnote" +"\n");
+
+
+            for(Stacks stack : stacks) {
+                returnMessage.append(stack.getNote().getType() + "count updated" + stack.getCount() + "\n");
+            }
+            return returnMessage;
 
     }
 
-    //public void init
-    public StringBuilder updateStacks(List<Notes> availableNotes, Integer nrNotes) {
-        //List<Integer> counts,
-        StringBuilder testString = new StringBuilder("refilledStacks");
-        Integer sumAdded = 0;
-        Integer valueCurrentNote = 0;
-        boolean containsStack = false;
-        //aici tb sa fac sa dau lista direct
+    public Float updateSoldFromNotes(Float sold,List<Notes> availableNotes,Integer nrNotes ){
+        Float newSold = sold;
+        for(Notes note : availableNotes){
+            newSold += note.getValue() * nrNotes;
+        }
 
+        return newSold;
+    }
+
+    public StringBuilder updateStacks(List<Notes> availableNotes, Integer nrNotes) {
+
+        StringBuilder testString = new StringBuilder("refilledStacks");
         if (stacks.isEmpty()) {
 
             stacks.add(new Stacks(availableNotes.get(0), nrNotes));//100
@@ -88,29 +83,23 @@ public class Accounts {
             stacks.add(new Stacks(availableNotes.get(2), nrNotes));//10
             stacks.add(new Stacks(availableNotes.get(3), nrNotes));//5
             stacks.add(new Stacks(availableNotes.get(4), nrNotes));//1
-            testString.append("SE ADAUGA " + availableNotes.get(0).toString() + "de n ori" + nrNotes);
-            testString.append("SE ADAUGA " + availableNotes.get(1).toString() + "de n ori" + nrNotes);
-            testString.append("SE ADAUGA " + availableNotes.get(2).toString() + "de n ori" + nrNotes);
-            testString.append("SE ADAUGA " + availableNotes.get(3).toString() + "de n ori" + nrNotes);
-            Float newsold = getSold() + nrNotes* (availableNotes.get(0).getValue()+
-            availableNotes.get(1).getValue()+
-                    availableNotes.get(2).getValue()+
-                    availableNotes.get(3).getValue()+
-                    availableNotes.get(4).getValue());
-            setSold(newsold);
+
+            Float newSold = updateSoldFromNotes(getSold(), availableNotes,nrNotes);
+            setSold(newSold);
+
         } else {
-            testString.append(stacks.toString());
+
             for (Notes iteratorNote : availableNotes) {
                 for (Stacks stack : stacks) {
                     if (stack.getNote().getType().equals(iteratorNote.getType())) {
                         stack.increaseCount(nrNotes);
-                        Float newsold = getSold() + nrNotes*stack.getNote().getValue();
-                        setSold(newsold);
+                        Float newSold = getSold() + nrNotes * stack.getNote().getValue();
+                        setSold(newSold);
 
                     }
 
 
-                    testString.append("\n");
+
                 }
             }
         }
@@ -118,58 +107,76 @@ public class Accounts {
 
     }
 
-    //AICI TB NEAPARAT REFACUTA!!!!
-    public StringBuilder countWithdraw(Integer sum) {
-        List<Integer> noteCounter = new ArrayList(5);
-        noteCounter.add(0);
-        noteCounter.add(0);
-        noteCounter.add(0);
-        noteCounter.add(0);
-        noteCounter.add(0);
-        noteCounter.add(0);
+    public StringBuilder messageAfterWithdraw(List<Integer> noteWithdrawer, Integer sumToBeExtracted) {
+        StringBuilder returnMessage = new StringBuilder("din suma" + sumToBeExtracted);
+        returnMessage.append("au fost extrase bancnotele : " + "\n");
+        returnMessage.append("You have extracted" + "\n" + noteWithdrawer.toString());
+        return returnMessage;
+    }
 
+    public List<Integer> countWithdraw(Integer sumToBeExtracted) {
 
-
-
-        Integer restValueNote;
-        StringBuilder returnMessage = new StringBuilder("extrag : " +"\n");
-        int noteValue;
-        Integer index;
-
+        List<Integer> noteWithdrawCounter = new ArrayList();
+        noteWithdrawCounter.addAll(Arrays.asList(0, 0, 0, 0, 0, 0));
 
         for (Stacks stack : stacks) {
-            Integer noteHolder = stack.getNote().getValue();
-            returnMessage.append("am intrat in for" + noteHolder.toString() + "\n");
+            Integer currentNoteValue = stack.getNote().getValue();
 
-            if (sum >= noteHolder) {
-                index = stacks.indexOf(stack);
-                returnMessage.append("+ suma e suficient de mare");
-                restValueNote = sum / noteHolder;
+            if (isCounterNotesGreaterOrEqualThanRest(sumToBeExtracted, currentNoteValue)) {
+                Integer indexOfCurrentExtractedNote = stacks.indexOf(stack);
+                Integer restValueNote = sumToBeExtracted / currentNoteValue;
 
-                returnMessage.append("AICI CAT RAMANE restValue note" + sum + "\n");
-                if (stack.getCount() - restValueNote > 0) {
-                    noteCounter.set(index,restValueNote);
-                    noteValue = stack.getNote().getValue();
-                    sum = sum - noteCounter.get(index)* noteValue;
-                    stack.decreaseCount(noteCounter.get(index));
-                    //stack.setCount( noteCounter.get(index));
+                if (isCounterNotesGreaterThanRest(stack.getCount(), restValueNote)) {
 
+                    noteWithdrawCounter.set(indexOfCurrentExtractedNote, restValueNote);
+                    sumToBeExtracted = updateSumToBeextracted(sumToBeExtracted,
+                            noteWithdrawCounter.get(indexOfCurrentExtractedNote) * currentNoteValue);
+                    stack.decreaseCount(noteWithdrawCounter.get(indexOfCurrentExtractedNote));
 
-                } else if (stack.getCount() > 0) {
-
+                } else if (isCounterNotesGreaterThanRest(stack.getCount(), 0)) {
                     while (stack.getCount() != 0) {
-                        sum = sum - stack.getNote().getValue();
+                        sumToBeExtracted = updateSumToBeextracted(sumToBeExtracted,
+                                currentNoteValue);
+                        ;
                         stack.decreaseCount(1);
-                        Integer element = noteCounter.get(index);
-                        noteCounter.set(index,element+1);
-
+                        Integer element = noteWithdrawCounter.get(indexOfCurrentExtractedNote);
+                        noteWithdrawCounter.set(indexOfCurrentExtractedNote, element + 1);
                     }
                 }
             }
 
         }
-        return returnMessage;
 
+        return noteWithdrawCounter;
+
+    }
+
+
+    public Boolean isCounterNotesGreaterThanRest(Integer counterNote, Integer restValueNote) {
+        if (counterNote > restValueNote) {
+            return true;
+        } else return false;
+    }
+
+    public Integer updateSumToBeextracted(Integer sumToBeExtracted, Integer noteValue) {
+        sumToBeExtracted -= noteValue;
+        return sumToBeExtracted;
+
+    }
+
+    public Boolean isCounterNotesGreaterOrEqualThanRest(Integer counterNote, Integer restValueNote) {
+        if (counterNote >= restValueNote) {
+            return true;
+        } else return false;
+    }
+
+
+    public List<Stacks> getStacks() {
+        return stacks;
+    }
+
+    public void setStacks(List<Stacks> stacks) {
+        this.stacks = stacks;
     }
 
 

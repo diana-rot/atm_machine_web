@@ -1,4 +1,5 @@
 package com.atm_machine_web.controller;
+
 import com.atm_machine_web.model.*;
 import com.atm_machine_web.service.*;
 import org.aspectj.weaver.ast.Not;
@@ -31,23 +32,24 @@ public class AtmController {
 
 
     @PostMapping("/refill_notes")
-    public ResponseEntity refillNotes(@RequestBody User owner,@RequestParam Integer nrNotes) {
-        // @RequestBody List<Stacks> stacksNotes
+    public ResponseEntity refillNotes(@RequestBody User owner, @RequestParam Integer nrNotes) {
+
         List<Notes> notes = notesService.findAll();
         Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
         if (accountsFromDb == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
         } else {
             Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now());
-            StringBuilder testString = new StringBuilder("test de la refill lista din atm: ");
-            testString.append(accountsFromDb.updateStacks(notes,nrNotes));
+            StringBuilder testString = new StringBuilder();
+            testString.append(accountsFromDb.updateStacks(notes, nrNotes));
+            testString.append(accountsFromDb.messageAfterUpdateStacks(notes, nrNotes));
+            testString.append("Soldul dvs este:" + accountsFromDb.getSold() + "\n");
             transactionsService.save(newTransaction);
             return ResponseEntity.status(HttpStatus.OK).body(testString);
-            }
+        }
 
     }
 
-    //cate un tip de bancnota, ideal ar fi sa cer username ul de la request param
 
     @PostMapping("/add_note")
     public ResponseEntity addNote(@RequestBody User owner,
@@ -68,17 +70,16 @@ public class AtmController {
 
             testString.append(accountsFromDb.refillStackNote(note, nrNotes));
 
-//            List<Stacks> stacks = accountsFromDb.getStacks();
-//            testString.append("sunt in else" + "control" + stacks.toString());
+
             Float sold = accountsFromDb.getSold();
             sold = sold + note.getValue() * nrNotes;
             accountsFromDb.setSold(sold);
             testString.append("sold is " + sold);
             transactionsService.save(newTransaction);
             return ResponseEntity.status(HttpStatus.OK).body(testString);
-            }
-
         }
+
+    }
 
 
     @PostMapping("/withdraw")
@@ -91,14 +92,13 @@ public class AtmController {
             if (sold > sum) {
 
                 Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now());
-                StringBuilder message = new StringBuilder();
-                message.append(accountsFromDb.countWithdraw(sum));
-                message.append(accountsFromDb.getStacks());
-
+                StringBuilder returnMessage = new StringBuilder();
+                List<Integer> extractedNotes = accountsFromDb.countWithdraw(sum);
+                returnMessage.append(accountsFromDb.messageAfterWithdraw(extractedNotes, sum));
                 sold = sold - sum;
                 accountsFromDb.setSold(sold);
                 transactionsService.save(newTransaction);
-                return ResponseEntity.status(HttpStatus.OK).body(message);
+                return ResponseEntity.status(HttpStatus.OK).body(returnMessage);
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient funds! Check your sold");
             }
