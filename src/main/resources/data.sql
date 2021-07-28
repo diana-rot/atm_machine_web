@@ -13,4 +13,5 @@ insert into notes values(2,'LEU','Leu_50',50);
 insert into notes values(3,'LEU','Leu_10',10);
 insert into notes values(4,'LEU','Leu_5',5);
 insert into notes values(5,'LEU','Leu_1',1);
+insert into atm values(1,1000);
 

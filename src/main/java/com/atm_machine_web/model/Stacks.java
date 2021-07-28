@@ -1,7 +1,7 @@
 package com.atm_machine_web.model;
 
 import javax.persistence.*;
-import java.util.List;
+
 
 @Entity(name = "Stacks")
 public class Stacks {
@@ -11,10 +11,6 @@ public class Stacks {
     private Long stackIdNote;
     @Column(name = "count")
     Integer count;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "transactions")
-    List<Transactions> transactionsList;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "note")

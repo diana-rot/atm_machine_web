@@ -13,7 +13,13 @@ public class AtmServiceImpl implements AtmService {
 
 
     @Override
-    public Atm findAtmByAtmId(Atm atmId) {
-        return atmRepository.findAtmByAtmId( atmId);
+    public Atm findAtmByAtmId(Long atmId) {
+        return atmRepository.findAtmByAtmId(atmId);
     }
+
+    @Override
+    public Atm save(Atm atm) {
+        return atmRepository.save(atm);
+    }
+
 }

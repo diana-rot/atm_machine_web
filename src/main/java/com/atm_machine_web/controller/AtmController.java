@@ -30,6 +30,27 @@ public class AtmController {
     @Autowired
     AtmService atmService;
 
+    @PostMapping("/refill_atm")
+    public ResponseEntity refillAtm(@RequestParam Integer nrNotes) {
+
+        List<Notes> notes = notesService.findAll();
+
+        Atm atmFromDb = atmService.findAtmByAtmId(1L);
+
+        if (atmFromDb == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This atm  doesn't exist");
+        } else {
+
+            StringBuilder testString = new StringBuilder();
+            testString.append(atmFromDb.updateStacks(notes, nrNotes));
+            testString.append(atmFromDb.messageAfterUpdateStacks(notes, nrNotes));
+            testString.append("Totalul dvs este:" + atmFromDb.getSold() + "\n");
+            atmService.save(atm);
+            return ResponseEntity.status(HttpStatus.OK).body(testString);
+        }
+
+    }
+
 
     @PostMapping("/refill_notes")
     public ResponseEntity refillNotes(@RequestBody User owner, @RequestParam Integer nrNotes) {
@@ -39,11 +60,12 @@ public class AtmController {
         if (accountsFromDb == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
         } else {
-            Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now());
+
             StringBuilder testString = new StringBuilder();
             testString.append(accountsFromDb.updateStacks(notes, nrNotes));
             testString.append(accountsFromDb.messageAfterUpdateStacks(notes, nrNotes));
             testString.append("Soldul dvs este:" + accountsFromDb.getSold() + "\n");
+            Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
             transactionsService.save(newTransaction);
             return ResponseEntity.status(HttpStatus.OK).body(testString);
         }
@@ -63,18 +85,15 @@ public class AtmController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
         } else {
 
-            Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now());
             Notes note = notesService.findValueByType(noteType); //se va sterge
-
             StringBuilder testString = new StringBuilder("test de la refill din atm: "); // param in functie
-
             testString.append(accountsFromDb.refillStackNote(note, nrNotes));
-
 
             Float sold = accountsFromDb.getSold();
             sold = sold + note.getValue() * nrNotes;
             accountsFromDb.setSold(sold);
             testString.append("sold is " + sold);
+            Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
             transactionsService.save(newTransaction);
             return ResponseEntity.status(HttpStatus.OK).body(testString);
         }
@@ -91,12 +110,13 @@ public class AtmController {
             Float sold = accountsFromDb.getSold();
             if (sold > sum) {
 
-                Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now());
+
                 StringBuilder returnMessage = new StringBuilder();
                 List<Integer> extractedNotes = accountsFromDb.countWithdraw(sum);
                 returnMessage.append(accountsFromDb.messageAfterWithdraw(extractedNotes, sum));
                 sold = sold - sum;
                 accountsFromDb.setSold(sold);
+                Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
                 transactionsService.save(newTransaction);
                 return ResponseEntity.status(HttpStatus.OK).body(returnMessage);
             } else {
