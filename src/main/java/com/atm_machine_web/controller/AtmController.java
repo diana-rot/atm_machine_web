@@ -110,7 +110,6 @@ public class AtmController {
             Float sold = accountsFromDb.getSold();
             if (sold > sum) {
 
-
                 StringBuilder returnMessage = new StringBuilder();
                 List<Integer> extractedNotes = accountsFromDb.countWithdraw(sum);
                 returnMessage.append(accountsFromDb.messageAfterWithdraw(extractedNotes, sum));
@@ -159,10 +158,4 @@ public class AtmController {
         }
     }
 
-
-    @GetMapping
-    public String welcome() {
-        return ("Hello! Select an action: /withdraw , /showNoteType, /balance");
-    }
 }
-
