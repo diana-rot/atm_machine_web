@@ -1,8 +1,10 @@
 package com.atm_machine_web.entity;
 
+import com.atm_machine_web.model.Accounts;
 import com.atm_machine_web.model.Notes;
 
 import com.atm_machine_web.model.Stacks;
+import com.atm_machine_web.model.User;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
@@ -15,24 +17,149 @@ public class Atm {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long atmId;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "stacks")
         List<Stacks> stacks;
-    boolean stackInitialized;
 
-//    Notes note;
-//    Map<Notes, Integer> mapNotesLimit = new HashMap<>();
-//
-//    List<Integer> notes = new ArrayList<>();
-//    List<Integer> noteFrequency = new ArrayList<>();
-//    Integer nr_notes;
+    @Column(name = "atm_sold")
+    Float sold;
 
 
-    public Atm(Long atmId, List<Stacks> stacks, boolean stackInitialized) {
-        this.atmId = atmId;
+
+    public Atm( List<Stacks> stacks) {
+
         this.stacks = stacks;
-        this.stackInitialized = stackInitialized;
+
     }
+
+
+    public StringBuilder messageAfterUpdateStacks(List<Notes> availableNotes, Integer nrNotes) {
+        StringBuilder returnMessage = new StringBuilder("Au fost adaugate bancnote" +"\n");
+
+
+        for(Stacks stack : stacks) {
+            returnMessage.append(stack.getNote().getType() + "count updated" + stack.getCount() + "\n");
+        }
+        return returnMessage;
+
+    }
+
+    public Float updateSoldFromNotes(Float sold,List<Notes> availableNotes,Integer nrNotes ){
+        Float newSold = sold;
+        for(Notes note : availableNotes){
+            newSold += note.getValue() * nrNotes;
+        }
+
+        return newSold;
+    }
+
+    public Float getSold() {
+        return sold;
+    }
+
+    public void setSold(Float sold) {
+        this.sold = sold;
+    }
+
+    public StringBuilder updateStacks(List<Notes> availableNotes, Integer nrNotes) {
+
+        StringBuilder testString;
+        testString = new StringBuilder("refilledStacks");
+        if (stacks.isEmpty()) {
+
+            stacks.add(new Stacks(availableNotes.get(0), nrNotes));//100
+            stacks.add(new Stacks(availableNotes.get(1), nrNotes));//50
+            stacks.add(new Stacks(availableNotes.get(2), nrNotes));//10
+            stacks.add(new Stacks(availableNotes.get(3), nrNotes));//5
+            stacks.add(new Stacks(availableNotes.get(4), nrNotes));//1
+
+            Float newSold = updateSoldFromNotes(getSold(), availableNotes,nrNotes);
+            setSold(newSold);
+
+        } else {
+
+            for (Notes iteratorNote : availableNotes) {
+                for (Stacks stack : stacks) {
+                    if (stack.getNote().getType().equals(iteratorNote.getType())) {
+                        stack.increaseCount(nrNotes);
+                        Float newSold = getSold() + nrNotes * stack.getNote().getValue();
+                        setSold(newSold);
+
+                    }
+
+
+
+                }
+            }
+        }
+        return testString;
+
+    }
+
+    public StringBuilder messageAfterWithdraw(List<Integer> noteWithdrawer, Integer sumToBeExtracted) {
+        StringBuilder returnMessage = new StringBuilder("din suma" + sumToBeExtracted);
+        returnMessage.append("au fost extrase bancnotele : " + "\n");
+        returnMessage.append("You have extracted" + "\n" + noteWithdrawer.toString());
+        return returnMessage;
+    }
+
+    public List<Integer> countWithdraw(Integer sumToBeExtracted) {
+
+        List<Integer> noteWithdrawCounter = new ArrayList();
+        noteWithdrawCounter.addAll(Arrays.asList(0, 0, 0, 0, 0, 0));
+
+        for (Stacks stack : stacks) {
+            Integer currentNoteValue = stack.getNote().getValue();
+
+            if (isCounterNotesGreaterOrEqualThanRest(sumToBeExtracted, currentNoteValue)) {
+                Integer indexOfCurrentExtractedNote = stacks.indexOf(stack);
+                Integer restValueNote = sumToBeExtracted / currentNoteValue;
+
+                if (isCounterNotesGreaterThanRest(stack.getCount(), restValueNote)) {
+
+                    noteWithdrawCounter.set(indexOfCurrentExtractedNote, restValueNote);
+                    sumToBeExtracted = updateSumToBeextracted(sumToBeExtracted,
+                            noteWithdrawCounter.get(indexOfCurrentExtractedNote) * currentNoteValue);
+                    stack.decreaseCount(noteWithdrawCounter.get(indexOfCurrentExtractedNote));
+
+                } else if (isCounterNotesGreaterThanRest(stack.getCount(), 0)) {
+                    while (stack.getCount() != 0) {
+                        sumToBeExtracted = updateSumToBeextracted(sumToBeExtracted,
+                                currentNoteValue);
+                        ;
+                        stack.decreaseCount(1);
+                        Integer element = noteWithdrawCounter.get(indexOfCurrentExtractedNote);
+                        noteWithdrawCounter.set(indexOfCurrentExtractedNote, element + 1);
+                    }
+                }
+            }
+
+        }
+
+        return noteWithdrawCounter;
+
+    }
+
+
+    public Boolean isCounterNotesGreaterThanRest(Integer counterNote, Integer restValueNote) {
+        if (counterNote > restValueNote) {
+            return true;
+        } else return false;
+    }
+
+    public Integer updateSumToBeextracted(Integer sumToBeExtracted, Integer noteValue) {
+        sumToBeExtracted -= noteValue;
+        return sumToBeExtracted;
+
+    }
+
+    public Boolean isCounterNotesGreaterOrEqualThanRest(Integer counterNote, Integer restValueNote) {
+        if (counterNote >= restValueNote) {
+            return true;
+        } else return false;
+    }
+
+
 
     public Long getAtmId() {
         return atmId;
@@ -50,13 +177,6 @@ public class Atm {
         this.stacks = stacks;
     }
 
-    public boolean isStackInitialized() {
-        return stackInitialized;
-    }
-
-    public void setStackInitialized(boolean stackInitialized) {
-        this.stackInitialized = stackInitialized;
-    }
 
     public Atm() {
 
@@ -111,6 +231,7 @@ public class Atm {
 //        int noteCounter[] = new int[5];
 //        Integer newNote;
 //        int index;
+
 //        for (Integer note : notes) {
 //            if (sum >= note) {
 //                newNote = sum / note;

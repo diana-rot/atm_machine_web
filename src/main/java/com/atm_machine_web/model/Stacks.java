@@ -1,7 +1,7 @@
 package com.atm_machine_web.model;
 
 import javax.persistence.*;
-import java.util.List;
+
 
 @Entity(name = "Stacks")
 public class Stacks {
@@ -11,10 +11,6 @@ public class Stacks {
     private Long stackIdNote;
     @Column(name = "count")
     Integer count;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "transactions")
-    List<Transactions> transactionsList;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "note")
@@ -55,12 +51,12 @@ public class Stacks {
         this.note = note;
     }
 
-    public Integer increaseCount(Integer newCount) {
-        return this.count + newCount;
+    public void increaseCount(Integer newCount) {
+       this.count =   this.count + newCount;
     }
 
-    public Integer decreaseCount(Integer newCount) {
-        return this.count - newCount;
+    public  void decreaseCount(Integer newCount) {
+        this.count =   this.count - newCount;
     }
 
     @Override
