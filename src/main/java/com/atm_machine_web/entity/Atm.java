@@ -17,17 +17,18 @@ public class Atm {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long atmId;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "stacks")
     List<Stacks> stacks;
 
-    @Column(name = "atm_money")
+    @Column(name = "atm_money",updatable = true)
     Float atmMoney;
 
 
     public Atm() {
 
     }
+
     public Atm(Float atmMoney) {
         this.atmMoney = atmMoney;
     }
@@ -102,6 +103,7 @@ public class Atm {
         }
         return testString;
     }
+
     public StringBuilder refillStackNote(Notes note, Integer nrNotes) {
 
         StringBuilder messageReturn = new StringBuilder("refillStackNote");
@@ -184,81 +186,6 @@ public class Atm {
 
 
 
-
-
-//    public List<Integer> getNoteFrequency() {
-//        return noteFrequency;
-//    }
-//
-//    public List<Integer> getNotes() {
-//        return notes;
-//    }
-//
-//    public Integer RestTotalNotes(List<Integer> noteFrequency) {
-//        Integer totalCountNotes = 0;
-//        for (Integer counterNote : noteFrequency) {
-//            totalCountNotes += counterNote;
-//        }
-//        return totalCountNotes;
-//    }
-//
-//    public void addMoney(List<Integer> sumToBeAdded) {
-//
-//        for (int i = 0; i < sumToBeAdded.size(); i++) {
-//
-//            noteFrequency.set(i, noteFrequency.get(i) + sumToBeAdded.get(i));
-//        }
-//
-//    }
-//
-//    public StringBuilder printCurrency(Integer sum, int nr_notes, int[] noteCounter, List<Integer> noteFrequency, List<Integer> notes) {
-//        StringBuilder message = new StringBuilder();
-//        message.append("Notes Count : ");
-//        for (int i = 0; i < nr_notes; i++) {
-//            if (noteCounter[i] != 0) {
-//                message.append(notes.get(i)).append(" : ").append(noteCounter[i]).append(" ");
-//                message.append(System.getProperty("line.separator"));
-//                message.append("left cash amount:").append
-//                        (noteFrequency.get(i)).append(":").append(notes.get(i)).append(" ");
-//            }
-//        }
-//        //showIfAllert(sum);
-//        return message;
-//    }
-//
-//    public StringBuilder countCurrency(Integer sum, int nr_notes, List<Integer> notes, List<Integer> noteFrequency) {
-//        int noteCounter[] = new int[5];
-//        Integer newNote;
-//        int index;
-
-//        for (Integer note : notes) {
-//            if (sum >= note) {
-//                newNote = sum / note;
-//                index = notes.indexOf(note);
-//                if (noteFrequency.get(index) - newNote > 0) {
-//
-//                    noteCounter[index] = sum / notes.get(index);
-//                    sum = sum - noteCounter[index] * notes.get(index);
-//                    noteFrequency.set(index, noteCounter[index]);
-//                } else if (noteFrequency.get(index) > 0) {
-//                    while (noteFrequency.get(index) != 0) {
-//                        sum = sum - notes.get(index);
-//                        noteFrequency.set(index, noteFrequency.get(index) - 1);
-//                        noteCounter[index]++;
-//                    }
-//                }
-//
-//            }
-//        }
-//
-//        return printCurrency(sum,nr_notes, noteCounter, noteFrequency, notes);
-//    }
-//
-//    public Integer PercentageOfSum(Integer note, Integer percentage) {
-//
-//        return(percentage /100)*mapNotesLimit.get(note);
-//
-//    }
 
 //    public void showIfAllert(Integer sum) {
 //

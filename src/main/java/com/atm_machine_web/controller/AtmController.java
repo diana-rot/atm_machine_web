@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -46,34 +45,12 @@ public class AtmController {
             testString.append(atmFromDb.updateStacks(notes, nrNotes));
             testString.append(atmFromDb.messageAfterUpdateStacks(notes, nrNotes));
             testString.append("Acum in bancomat sunt:" + atmFromDb.getAtmMoney() + "\n");
-
-           atmService.save(atm); //ar trebui aici un update?
+            //atmFromDb.setAtmMoney(atm.getAtmMoney());
+            atmService.save(atm); //ar trebui aici un update?
             return ResponseEntity.status(HttpStatus.OK).body(testString);
         }
 
     }
-
-
-//    @PostMapping("/refill_notes")
-//    public ResponseEntity refillNotes(@RequestBody User owner, @RequestParam Integer nrNotes) {
-//        //DTO
-//
-//        List<Notes> notes = notesService.findAll();
-//        Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
-//        if (accountsFromDb == null) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
-//        } else {
-//
-//            StringBuilder testString = new StringBuilder();
-//            testString.append(accountsFromDb.updateStacks(notes, nrNotes));
-//            testString.append(accountsFromDb.messageAfterUpdateStacks(notes, nrNotes));
-//            testString.append("Soldul dvs este:" + accountsFromDb.getSold() + "\n");
-//            Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
-//            transactionsService.save(newTransaction);
-//            return ResponseEntity.status(HttpStatus.OK).body(testString);
-//        }
-//
-//    }
 
 
     @PostMapping("/add_note_to_atm")
