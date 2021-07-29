@@ -14,7 +14,7 @@ import java.util.*;
 @Entity(name = "Atm")
 public class Atm {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long atmId;
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -89,6 +89,7 @@ public class Atm {
             stacks.add(new Stacks(availableNotes.get(4), nrNotes));//1
             Float newAtmMoney = updateAtmMoneyFromNotes(getAtmMoney(), availableNotes, nrNotes);
             setAtmMoney(newAtmMoney);
+
         } else {
             for (Notes iteratorNote : availableNotes) {
                 for (Stacks stack : stacks) {

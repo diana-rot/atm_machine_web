@@ -47,6 +47,7 @@ public class AtmController {
             testString.append("Acum in bancomat sunt:" + atmFromDb.getAtmMoney() + "\n");
             //atmFromDb.setAtmMoney(atm.getAtmMoney());
             atmService.save(atm); //ar trebui aici un update?
+
             return ResponseEntity.status(HttpStatus.OK).body(testString);
         }
 
