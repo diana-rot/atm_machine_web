@@ -21,5 +21,9 @@ public class AtmServiceImpl implements AtmService {
     public Atm save(Atm atm) {
         return atmRepository.save(atm);
     }
+//    @Override
+//    public Atm updateAtm(Atm atm){
+//        return atmRepository.updateAtm(atm);
+   // }
 
 }

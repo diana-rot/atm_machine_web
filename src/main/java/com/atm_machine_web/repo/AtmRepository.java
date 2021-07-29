@@ -9,6 +9,4 @@ import java.util.List;
 public interface AtmRepository extends JpaRepository<Atm, Long> {
     Atm findAtmByAtmId(Long AtmId);
 
-
-
 }

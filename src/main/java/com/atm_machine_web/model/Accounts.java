@@ -36,76 +36,13 @@ public class Accounts {
         this.stacks = new ArrayList<>();
     }
 
-
-    public StringBuilder refillStackNote(Notes note, Integer nrNotes) {
-
-        StringBuilder messageReturn = new StringBuilder("refillStackNote");
-        if (stacks.isEmpty()) {
-            stacks.add(new Stacks(note, nrNotes));
-        } else {
-            for (Stacks stack : stacks) {
-                if (stack.getNote().getType().equals(note.getType())) {
-                    stack.increaseCount(nrNotes);
-
-                }
-            }
-        }
-        return messageReturn;
-
-    }
-    public StringBuilder messageAfterUpdateStacks(List<Notes> availableNotes, Integer nrNotes) {
-        StringBuilder returnMessage = new StringBuilder("Au fost adaugate bancnote" +"\n");
-
-
-            for(Stacks stack : stacks) {
-                returnMessage.append(stack.getNote().getType() + "count updated" + stack.getCount() + "\n");
-            }
-            return returnMessage;
-
-    }
-
-    public Float updateSoldFromNotes(Float sold,List<Notes> availableNotes,Integer nrNotes ){
-        Float newSold = sold;
-        for(Notes note : availableNotes){
-            newSold += note.getValue() * nrNotes;
-        }
-
+    public Float withdrawFromSold(Integer sum){
+        Float newSold = getSold() - sum;
+        setSold(newSold);
         return newSold;
     }
 
-    public StringBuilder updateStacks(List<Notes> availableNotes, Integer nrNotes) {
 
-        StringBuilder testString = new StringBuilder("refilledStacks");
-        if (stacks.isEmpty()) {
-
-            stacks.add(new Stacks(availableNotes.get(0), nrNotes));//100
-            stacks.add(new Stacks(availableNotes.get(1), nrNotes));//50
-            stacks.add(new Stacks(availableNotes.get(2), nrNotes));//10
-            stacks.add(new Stacks(availableNotes.get(3), nrNotes));//5
-            stacks.add(new Stacks(availableNotes.get(4), nrNotes));//1
-
-            Float newSold = updateSoldFromNotes(getSold(), availableNotes,nrNotes);
-            setSold(newSold);
-
-        } else {
-
-            for (Notes iteratorNote : availableNotes) {
-                for (Stacks stack : stacks) {
-                    if (stack.getNote().getType().equals(iteratorNote.getType())) {
-                        stack.increaseCount(nrNotes);
-                        Float newSold = getSold() + nrNotes * stack.getNote().getValue();
-                        setSold(newSold);
-
-                    }
-
-
-
-                }
-            }
-        }
-        return testString;
-
-    }
 
     public StringBuilder messageAfterWithdraw(List<Integer> noteWithdrawer, Integer sumToBeExtracted) {
         StringBuilder returnMessage = new StringBuilder("din suma" + sumToBeExtracted);

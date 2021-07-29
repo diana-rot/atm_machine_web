@@ -30,8 +30,9 @@ public class AtmController {
     @Autowired
     AtmService atmService;
 
-    @PostMapping("/refill_atm")
-    public ResponseEntity refillAtm(@RequestParam Integer nrNotes) {
+    //aici trebuie si ownerul sa vad daca e admin sau nu
+    @PostMapping("/refill_stacks_atm")
+    public ResponseEntity refillStacksAtm(@RequestParam Integer nrNotes) {
 
         List<Notes> notes = notesService.findAll();
 
@@ -44,86 +45,99 @@ public class AtmController {
             StringBuilder testString = new StringBuilder();
             testString.append(atmFromDb.updateStacks(notes, nrNotes));
             testString.append(atmFromDb.messageAfterUpdateStacks(notes, nrNotes));
-            testString.append("Totalul dvs este:" + atmFromDb.getSold() + "\n");
-            atmService.save(atm);
+            testString.append("Acum in bancomat sunt:" + atmFromDb.getAtmMoney() + "\n");
+
+           atmService.save(atm); //ar trebui aici un update?
             return ResponseEntity.status(HttpStatus.OK).body(testString);
         }
 
     }
 
 
-    @PostMapping("/refill_notes")
-    public ResponseEntity refillNotes(@RequestBody User owner, @RequestParam Integer nrNotes) {
+//    @PostMapping("/refill_notes")
+//    public ResponseEntity refillNotes(@RequestBody User owner, @RequestParam Integer nrNotes) {
+//        //DTO
+//
+//        List<Notes> notes = notesService.findAll();
+//        Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
+//        if (accountsFromDb == null) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
+//        } else {
+//
+//            StringBuilder testString = new StringBuilder();
+//            testString.append(accountsFromDb.updateStacks(notes, nrNotes));
+//            testString.append(accountsFromDb.messageAfterUpdateStacks(notes, nrNotes));
+//            testString.append("Soldul dvs este:" + accountsFromDb.getSold() + "\n");
+//            Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
+//            transactionsService.save(newTransaction);
+//            return ResponseEntity.status(HttpStatus.OK).body(testString);
+//        }
+//
+//    }
 
-        List<Notes> notes = notesService.findAll();
+
+    @PostMapping("/add_note_to_atm")
+    public ResponseEntity addNoteToAtm(@RequestBody User owner,
+                                       @RequestParam String noteType,
+                                       @RequestParam Integer nrNotes) {
+
+
         Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
-        if (accountsFromDb == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
+        Atm atmFromDb = atmService.findAtmByAtmId(1L);
+
+        if (atmFromDb == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This atm  doesn't exist");
         } else {
+            if (accountsFromDb == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
+            } else {
 
-            StringBuilder testString = new StringBuilder();
-            testString.append(accountsFromDb.updateStacks(notes, nrNotes));
-            testString.append(accountsFromDb.messageAfterUpdateStacks(notes, nrNotes));
-            testString.append("Soldul dvs este:" + accountsFromDb.getSold() + "\n");
-            Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
-            transactionsService.save(newTransaction);
-            return ResponseEntity.status(HttpStatus.OK).body(testString);
-        }
+                Notes note = notesService.findValueByType(noteType); //se va sterge
+                StringBuilder testString = new StringBuilder("test de la refill din atm: "); // param in functie
+                testString.append(atmFromDb.refillStackNote(note, nrNotes));
 
-    }
-
-
-    @PostMapping("/add_note")
-    public ResponseEntity addNote(@RequestBody User owner,
-                                  @RequestParam String noteType,
-                                  @RequestParam Integer nrNotes) {
-
-
-        Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
-
-        if (accountsFromDb == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
-        } else {
-
-            Notes note = notesService.findValueByType(noteType); //se va sterge
-            StringBuilder testString = new StringBuilder("test de la refill din atm: "); // param in functie
-            testString.append(accountsFromDb.refillStackNote(note, nrNotes));
-
-            Float sold = accountsFromDb.getSold();
-            sold = sold + note.getValue() * nrNotes;
-            accountsFromDb.setSold(sold);
-            testString.append("sold is " + sold);
-            Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
-            transactionsService.save(newTransaction);
-            return ResponseEntity.status(HttpStatus.OK).body(testString);
-        }
-
-    }
-
-
-    @PostMapping("/withdraw")
-    public ResponseEntity withdraw(Integer sum, @RequestBody User owner) {
-        Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
-        if (accountsFromDb == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
-        } else {
-            Float sold = accountsFromDb.getSold();
-            if (sold > sum) {
-
-                StringBuilder returnMessage = new StringBuilder();
-                List<Integer> extractedNotes = accountsFromDb.countWithdraw(sum);
-                returnMessage.append(accountsFromDb.messageAfterWithdraw(extractedNotes, sum));
-                sold = sold - sum;
+                Float sold = accountsFromDb.getSold();
+                sold = sold + note.getValue() * nrNotes;
                 accountsFromDb.setSold(sold);
+
+                testString.append("sold is " + sold);
                 Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
                 transactionsService.save(newTransaction);
-                return ResponseEntity.status(HttpStatus.OK).body(returnMessage);
+                return ResponseEntity.status(HttpStatus.OK).body(testString);
+            }
+        }
+
+    }
+
+
+    @PostMapping("/withdraw_from_atm")
+    public ResponseEntity withdraw(Integer sum, @RequestBody User owner) {
+        Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
+        Atm atmFromDb = atmService.findAtmByAtmId(1L);
+
+        if (atmFromDb == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This atm  doesn't exist");
+        } else {
+            if (accountsFromDb == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient funds! Check your sold");
+                Float sold = accountsFromDb.getSold();
+                if (sold > sum) {
+                    StringBuilder returnMessage = new StringBuilder();
+                    //mai pot pune aici mesaje de atentionare user
+                    List<Integer> extractedNotes = atmFromDb.countWithdraw(sum);
+                    returnMessage.append(atmFromDb.messageAfterWithdraw(extractedNotes, sum));
+                    accountsFromDb.withdrawFromSold(sum);
+                    Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
+                    transactionsService.save(newTransaction);
+                    return ResponseEntity.status(HttpStatus.OK).body(returnMessage);
+                } else {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient funds! Check your sold");
+                }
+
             }
 
         }
-
     }
 
     @GetMapping("/show_stacks")

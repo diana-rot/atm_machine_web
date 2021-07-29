@@ -19,46 +19,61 @@ public class Atm {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "stacks")
-        List<Stacks> stacks;
+    List<Stacks> stacks;
 
-    @Column(name = "atm_sold")
-    Float sold;
+    @Column(name = "atm_money")
+    Float atmMoney;
 
 
+    public Atm() {
 
-    public Atm( List<Stacks> stacks) {
+    }
+    public Atm(Float atmMoney) {
+        this.atmMoney = atmMoney;
+    }
 
+    public Float getAtmMoney() {
+        return atmMoney;
+    }
+
+    public void setAtmMoney(Float atmMoney) {
+        this.atmMoney = atmMoney;
+    }
+
+    public Long getAtmId() {
+        return atmId;
+    }
+
+    public void setAtmId(Long atmId) {
+        this.atmId = atmId;
+    }
+
+    public List<Stacks> getStacks() {
+        return stacks;
+    }
+
+    public void setStacks(List<Stacks> stacks) {
         this.stacks = stacks;
-
     }
 
 
     public StringBuilder messageAfterUpdateStacks(List<Notes> availableNotes, Integer nrNotes) {
-        StringBuilder returnMessage = new StringBuilder("Au fost adaugate bancnote" +"\n");
-
-
-        for(Stacks stack : stacks) {
+        StringBuilder returnMessage = new StringBuilder("Au fost adaugate urmatoarele bancnote in atm:" + "\n");
+        for (Stacks stack : stacks) {
             returnMessage.append(stack.getNote().getType() + "count updated" + stack.getCount() + "\n");
         }
         return returnMessage;
 
     }
 
-    public Float updateSoldFromNotes(Float sold,List<Notes> availableNotes,Integer nrNotes ){
-        Float newSold = sold;
-        for(Notes note : availableNotes){
-            newSold += note.getValue() * nrNotes;
+    public Float updateAtmMoneyFromNotes(Float atmMoney, List<Notes> availableNotes, Integer nrNotes) {
+        Float newAtmMoney;
+        newAtmMoney = atmMoney;
+        for (Notes note : availableNotes) {
+            newAtmMoney += note.getValue() * nrNotes;
         }
 
-        return newSold;
-    }
-
-    public Float getSold() {
-        return sold;
-    }
-
-    public void setSold(Float sold) {
-        this.sold = sold;
+        return newAtmMoney;
     }
 
     public StringBuilder updateStacks(List<Notes> availableNotes, Integer nrNotes) {
@@ -66,33 +81,41 @@ public class Atm {
         StringBuilder testString;
         testString = new StringBuilder("refilledStacks");
         if (stacks.isEmpty()) {
-
             stacks.add(new Stacks(availableNotes.get(0), nrNotes));//100
             stacks.add(new Stacks(availableNotes.get(1), nrNotes));//50
             stacks.add(new Stacks(availableNotes.get(2), nrNotes));//10
             stacks.add(new Stacks(availableNotes.get(3), nrNotes));//5
             stacks.add(new Stacks(availableNotes.get(4), nrNotes));//1
-
-            Float newSold = updateSoldFromNotes(getSold(), availableNotes,nrNotes);
-            setSold(newSold);
-
+            Float newAtmMoney = updateAtmMoneyFromNotes(getAtmMoney(), availableNotes, nrNotes);
+            setAtmMoney(newAtmMoney);
         } else {
-
             for (Notes iteratorNote : availableNotes) {
                 for (Stacks stack : stacks) {
                     if (stack.getNote().getType().equals(iteratorNote.getType())) {
                         stack.increaseCount(nrNotes);
-                        Float newSold = getSold() + nrNotes * stack.getNote().getValue();
-                        setSold(newSold);
+                        Float newAtmMoney = getAtmMoney() + nrNotes * stack.getNote().getValue();
+                        setAtmMoney(newAtmMoney);
 
                     }
-
-
-
                 }
             }
         }
         return testString;
+    }
+    public StringBuilder refillStackNote(Notes note, Integer nrNotes) {
+
+        StringBuilder messageReturn = new StringBuilder("refillStackNote");
+        if (stacks.isEmpty()) {
+            stacks.add(new Stacks(note, nrNotes));
+        } else {
+            for (Stacks stack : stacks) {
+                if (stack.getNote().getType().equals(note.getType())) {
+                    stack.increaseCount(nrNotes);
+
+                }
+            }
+        }
+        return messageReturn;
 
     }
 
@@ -161,31 +184,7 @@ public class Atm {
 
 
 
-    public Long getAtmId() {
-        return atmId;
-    }
 
-    public void setAtmId(Long atmId) {
-        this.atmId = atmId;
-    }
-
-    public List<Stacks> getStacks() {
-        return stacks;
-    }
-
-    public void setStacks(List<Stacks> stacks) {
-        this.stacks = stacks;
-    }
-
-
-    public Atm() {
-
-//        mapNotesLimit.put(new Notes("LEU_100",100), 50);
-//        mapNotesLimit.put(new Notes("LEU_50",50), 50);
-//        mapNotesLimit.put(new Notes("LEU_10",10), 100);
-//        mapNotesLimit.put(new Notes("LEU_5",5), 100);
-//        mapNotesLimit.put(new Notes("LEU_1",1), 100);
-    }
 
 //    public List<Integer> getNoteFrequency() {
 //        return noteFrequency;
@@ -287,12 +286,6 @@ public class Atm {
 //                    new StringBuilder("You want to extract over 200 lei from ATM<>, if it s not you, URGENTLY CONTACT THE BANK"),
 //                    new StringBuilder("0767893240"))).printNotification();
 //        }
-
-
-
-
-
-
 
 
 }
