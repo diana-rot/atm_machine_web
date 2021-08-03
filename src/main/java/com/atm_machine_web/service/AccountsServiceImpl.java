@@ -17,12 +17,10 @@ public class AccountsServiceImpl implements AccountsService {
     }
 
 
-
     @Override
     public Accounts findAccountsByAccountId(Long accountId) {
         return accountsRepository.findAccountsByAccountId(accountId);
     }
-
 
 
     @Override

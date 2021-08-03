@@ -13,13 +13,18 @@ public class NotesServiceImpl implements NotesService {
     NotesRepository notesRepository;
 
     @Override
-    public Notes findValueByType(String type) {
+    public Integer findValueByType(String type) {
         return notesRepository.findValueByType(type);
     }
 
     @Override
     public List<Notes> findAll() {
         return notesRepository.findAll();
+    }
+
+    @Override
+    public Notes findNotesByType(String noteType) {
+        return notesRepository.findNotesByType(noteType);
     }
 
 }

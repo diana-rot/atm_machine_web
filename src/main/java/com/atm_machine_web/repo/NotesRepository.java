@@ -8,7 +8,8 @@ import java.util.List;
 
 @Repository
 public interface NotesRepository extends JpaRepository<Notes,Long> {
-     Notes findValueByType(String type);
+     Integer findValueByType(String type);
+     Notes findNotesByType(String noteType);
      List<Notes> findAll();
 
 }

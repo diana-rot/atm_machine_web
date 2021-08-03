@@ -129,42 +129,42 @@ public class Atm {
         return returnMessage;
     }
 
-    public List<Integer> countWithdraw(Integer sumToBeExtracted) {
-
-        List<Integer> noteWithdrawCounter = new ArrayList();
-        noteWithdrawCounter.addAll(Arrays.asList(0, 0, 0, 0, 0, 0));
-
-        for (Stacks stack : stacks) {
-            Integer currentNoteValue = stack.getNote().getValue();
-
-            if (isCounterNotesGreaterOrEqualThanRest(sumToBeExtracted, currentNoteValue)) {
-                Integer indexOfCurrentExtractedNote = stacks.indexOf(stack);
-                Integer restValueNote = sumToBeExtracted / currentNoteValue;
-
-                if (isCounterNotesGreaterThanRest(stack.getCount(), restValueNote)) {
-
-                    noteWithdrawCounter.set(indexOfCurrentExtractedNote, restValueNote);
-                    sumToBeExtracted = updateSumToBeextracted(sumToBeExtracted,
-                            noteWithdrawCounter.get(indexOfCurrentExtractedNote) * currentNoteValue);
-                    stack.decreaseCount(noteWithdrawCounter.get(indexOfCurrentExtractedNote));
-
-                } else if (isCounterNotesGreaterThanRest(stack.getCount(), 0)) {
-                    while (stack.getCount() != 0) {
-                        sumToBeExtracted = updateSumToBeextracted(sumToBeExtracted,
-                                currentNoteValue);
-                        ;
-                        stack.decreaseCount(1);
-                        Integer element = noteWithdrawCounter.get(indexOfCurrentExtractedNote);
-                        noteWithdrawCounter.set(indexOfCurrentExtractedNote, element + 1);
-                    }
-                }
-            }
-
-        }
-
-        return noteWithdrawCounter;
-
-    }
+//    public List<Integer> countWithdraw(Integer sumToBeExtracted) {
+//
+//        List<Integer> noteWithdrawCounter = new ArrayList();
+//        noteWithdrawCounter.addAll(Arrays.asList(0, 0, 0, 0, 0, 0));
+//
+//        for (Stacks stack : stacks) {
+//            Integer currentNoteValue = stack.getNote().getValue();
+//
+//            if (isCounterNotesGreaterOrEqualThanRest(sumToBeExtracted, currentNoteValue)) {
+//                Integer indexOfCurrentExtractedNote = stacks.indexOf(stack);
+//                Integer restValueNote = sumToBeExtracted / currentNoteValue;
+//
+//                if (isCounterNotesGreaterThanRest(stack.getCount(), restValueNote)) {
+//
+//                    noteWithdrawCounter.set(indexOfCurrentExtractedNote, restValueNote);
+//                    sumToBeExtracted = updateSumToBeextracted(sumToBeExtracted,
+//                            noteWithdrawCounter.get(indexOfCurrentExtractedNote) * currentNoteValue);
+//                    stack.decreaseCount(noteWithdrawCounter.get(indexOfCurrentExtractedNote));
+//
+//                } else if (isCounterNotesGreaterThanRest(stack.getCount(), 0)) {
+//                    while (stack.getCount() != 0) {
+//                        sumToBeExtracted = updateSumToBeextracted(sumToBeExtracted,
+//                                currentNoteValue);
+//
+//                        stack.decreaseCount(1);
+//                        Integer element = noteWithdrawCounter.get(indexOfCurrentExtractedNote);
+//                        noteWithdrawCounter.set(indexOfCurrentExtractedNote, element + 1);
+//                    }
+//                }
+//            }
+//
+//        }
+//
+//        return noteWithdrawCounter;
+//
+//    }
 
 
     public Boolean isCounterNotesGreaterThanRest(Integer counterNote, Integer restValueNote) {

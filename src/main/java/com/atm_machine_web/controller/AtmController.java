@@ -1,13 +1,14 @@
 package com.atm_machine_web.controller;
 
+import com.atm_machine_web.controller.dto.*;
 import com.atm_machine_web.model.*;
 import com.atm_machine_web.service.*;
-import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.atm_machine_web.entity.Atm;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.modelmapper.ModelMapper;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,8 +29,10 @@ public class AtmController {
     NotesService notesService;
     @Autowired
     AtmService atmService;
+    @Autowired
+    ModelMapper modelMapper;
 
-    //aici trebuie si ownerul sa vad daca e admin sau nu
+
     @PostMapping("/refill_stacks_atm")
     public ResponseEntity refillStacksAtm(@RequestParam Integer nrNotes) {
 
@@ -41,25 +44,22 @@ public class AtmController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This atm  doesn't exist");
         } else {
 
-            StringBuilder testString = new StringBuilder();
-            testString.append(atmFromDb.updateStacks(notes, nrNotes));
-            testString.append(atmFromDb.messageAfterUpdateStacks(notes, nrNotes));
-            testString.append("Acum in bancomat sunt:" + atmFromDb.getAtmMoney() + "\n");
-            //atmFromDb.setAtmMoney(atm.getAtmMoney());
-            atmService.save(atm); //ar trebui aici un update?
+            atmFromDb.updateStacks(notes, nrNotes);
+            atmFromDb.messageAfterUpdateStacks(notes, nrNotes);
+            atmService.save(atm);
+            AtmDTO atmDto = modelMapper.map(atmFromDb, AtmDTO.class);
 
-            return ResponseEntity.status(HttpStatus.OK).body(testString);
+            return ResponseEntity.status(HttpStatus.OK).body(atmDto);
         }
 
     }
 
 
+
     @PostMapping("/add_note_to_atm")
-    public ResponseEntity addNoteToAtm(@RequestBody User owner,
-                                       @RequestParam String noteType,
-                                       @RequestParam Integer nrNotes) {
+    public ResponseEntity addNoteToAtm( @RequestBody NoteToAtmDTO dto) {
 
-
+        User owner = userService.findUserByUserName(dto.getUsername());
         Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
         Atm atmFromDb = atmService.findAtmByAtmId(1L);
 
@@ -70,18 +70,20 @@ public class AtmController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
             } else {
 
-                Notes note = notesService.findValueByType(noteType); //se va sterge
-                StringBuilder testString = new StringBuilder("test de la refill din atm: "); // param in functie
-                testString.append(atmFromDb.refillStackNote(note, nrNotes));
+                Notes note = notesService.findNotesByType(dto.getNoteType());
+                atmFromDb.refillStackNote(note, dto.getNrNotes());
 
+                //set sold in db function
                 Float sold = accountsFromDb.getSold();
-                sold = sold + note.getValue() * nrNotes;
+                sold = sold + note.getValue() *  dto.getNrNotes();
                 accountsFromDb.setSold(sold);
+                ///
 
-                testString.append("sold is " + sold);
                 Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
                 transactionsService.save(newTransaction);
-                return ResponseEntity.status(HttpStatus.OK).body(testString);
+
+                AtmDTO atmDto = modelMapper.map(atmFromDb, AtmDTO.class);
+                return ResponseEntity.status(HttpStatus.OK).body(atmDto);
             }
         }
 
@@ -89,7 +91,8 @@ public class AtmController {
 
 
     @PostMapping("/withdraw_from_atm")
-    public ResponseEntity withdraw(Integer sum, @RequestBody User owner) {
+    public ResponseEntity withdraw(@RequestBody WithdrawDTO dto) {
+        User owner = userService.findUserByUserName(dto.getUsername());
         Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
         Atm atmFromDb = atmService.findAtmByAtmId(1L);
 
@@ -100,15 +103,19 @@ public class AtmController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
             } else {
                 Float sold = accountsFromDb.getSold();
-                if (sold > sum) {
-                    StringBuilder returnMessage = new StringBuilder();
-                    //mai pot pune aici mesaje de atentionare user
-                    List<Integer> extractedNotes = atmFromDb.countWithdraw(sum);
-                    returnMessage.append(atmFromDb.messageAfterWithdraw(extractedNotes, sum));
-                    accountsFromDb.withdrawFromSold(sum);
+                if (sold > dto.getSum()) {
+
+                    List<Integer> extractedNotes = atmService.countWithdraw(dto.getSum());
+                    atmFromDb.messageAfterWithdraw(extractedNotes,dto.getSum());
+                    accountsFromDb.withdrawFromSold(dto.getSum());
                     Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
                     transactionsService.save(newTransaction);
-                    return ResponseEntity.status(HttpStatus.OK).body(returnMessage);
+                    AccountsDTO accountsDTO = modelMapper.map(accountsFromDb, AccountsDTO.class);
+                    WithdrawResponseDTO responseDTO = modelMapper.map(atmFromDb, WithdrawResponseDTO.class);
+                    responseDTO.setUsername(dto.getUsername());
+                    responseDTO.setCurrency(dto.getCurrency());
+                    responseDTO.setSold(accountsFromDb.getSold());
+                    return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
                 } else {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient funds! Check your sold");
                 }
@@ -128,26 +135,6 @@ public class AtmController {
         return notesService.findAll().toString();
     }
 
-    @PostMapping("/add_account")
-    public ResponseEntity addAccount(@RequestBody Accounts newAccount) {
-        Accounts accountsFromDb = accountsService.findAccountsByOwner(newAccount.getOwner());
-        if (accountsFromDb == null) {
-            Accounts addedAccount = accountsService.save(newAccount);
-            return ResponseEntity.status(HttpStatus.OK).body(addedAccount);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This account already exists!");
-        }
-    }
 
-    @PostMapping("/add_user")
-    public ResponseEntity addUser(@RequestBody User newUser) {
-        User userFromDb = userService.findUserByUserName(newUser.getUserName());
-        if (userFromDb == null) {
-            User addedUser = userService.save(newUser);
-            return ResponseEntity.status(HttpStatus.OK).body(addedUser);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This username already exists!");
-        }
-    }
 
 }
