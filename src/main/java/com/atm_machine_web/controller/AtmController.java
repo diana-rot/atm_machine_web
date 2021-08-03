@@ -44,8 +44,7 @@ public class AtmController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This atm  doesn't exist");
         } else {
 
-            atmFromDb.updateStacks(notes, nrNotes);
-            atmFromDb.messageAfterUpdateStacks(notes, nrNotes);
+            atmService.updateStacks(notes, nrNotes);
             atmService.save(atm);
             AtmDTO atmDto = modelMapper.map(atmFromDb, AtmDTO.class);
 
@@ -55,9 +54,8 @@ public class AtmController {
     }
 
 
-
     @PostMapping("/add_note_to_atm")
-    public ResponseEntity addNoteToAtm( @RequestBody NoteToAtmDTO dto) {
+    public ResponseEntity addNoteToAtm(@RequestBody NoteToAtmDTO dto) {
 
         User owner = userService.findUserByUserName(dto.getUsername());
         Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
@@ -71,13 +69,13 @@ public class AtmController {
             } else {
 
                 Notes note = notesService.findNotesByType(dto.getNoteType());
-                atmFromDb.refillStackNote(note, dto.getNrNotes());
+                atmService.refillStackNote(note, dto.getNrNotes());
+
 
                 //set sold in db function
-                Float sold = accountsFromDb.getSold();
-                sold = sold + note.getValue() *  dto.getNrNotes();
-                accountsFromDb.setSold(sold);
-                ///
+                accountsService.updateSold(note.getValue() , dto.getNrNotes(),accountsFromDb);
+                //nu se updateaza atmmoney
+                System.out.println(accountsFromDb.getSold());
 
                 Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
                 transactionsService.save(newTransaction);
@@ -106,11 +104,9 @@ public class AtmController {
                 if (sold > dto.getSum()) {
 
                     List<Integer> extractedNotes = atmService.countWithdraw(dto.getSum());
-                    atmFromDb.messageAfterWithdraw(extractedNotes,dto.getSum());
                     accountsFromDb.withdrawFromSold(dto.getSum());
                     Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
                     transactionsService.save(newTransaction);
-                    AccountsDTO accountsDTO = modelMapper.map(accountsFromDb, AccountsDTO.class);
                     WithdrawResponseDTO responseDTO = modelMapper.map(atmFromDb, WithdrawResponseDTO.class);
                     responseDTO.setUsername(dto.getUsername());
                     responseDTO.setCurrency(dto.getCurrency());
@@ -134,7 +130,6 @@ public class AtmController {
     public String showNotes() {
         return notesService.findAll().toString();
     }
-
 
 
 }

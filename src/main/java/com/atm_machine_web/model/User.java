@@ -24,8 +24,7 @@ public class User {
     private String email;
 
 
-    public User(Long userId, String userName, String userType, String phoneNr, String email) {
-        this.userId = userId;
+    public User( String userName, String userType, String phoneNr, String email) {
         this.userName = userName;
         this.userType = userType;
         this.phoneNr = phoneNr;

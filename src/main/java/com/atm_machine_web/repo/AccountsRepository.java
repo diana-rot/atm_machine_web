@@ -15,6 +15,5 @@ public interface AccountsRepository extends JpaRepository<Accounts, Long> {
 
     Float findSoldByAccountId(Long accountId);
 
-
 }
 

@@ -22,6 +22,14 @@ public class AccountsServiceImpl implements AccountsService {
         return accountsRepository.findAccountsByAccountId(accountId);
     }
 
+    @Override
+    public void updateSold(Integer noteValue, Integer Nrnotes, Accounts accountsFromDb) {
+
+        Float sold = accountsFromDb.getSold();
+        sold = sold + noteValue * Nrnotes;
+        accountsFromDb.setSold(sold);
+
+    }
 
     @Override
     public Float findSoldByAccountId(Long accountId) {

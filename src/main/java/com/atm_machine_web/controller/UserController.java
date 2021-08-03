@@ -1,6 +1,7 @@
 package com.atm_machine_web.controller;
 
 import com.atm_machine_web.controller.dto.AccountsDTO;
+import com.atm_machine_web.controller.dto.UserDTO;
 import com.atm_machine_web.controller.dto.WithdrawResponseDTO;
 import com.atm_machine_web.entity.Atm;
 import com.atm_machine_web.model.Accounts;
@@ -37,7 +38,7 @@ public class UserController {
     public ResponseEntity addAccount(@RequestBody Accounts newAccount) {
         Accounts accountsFromDb = accountsService.findAccountsByOwner(newAccount.getOwner());
         if (accountsFromDb == null) {
-            Accounts addedAccount = accountsService.save(newAccount);
+            accountsService.save(newAccount);
             AccountsDTO responseDTO = modelMapper.map(newAccount, AccountsDTO.class);
             return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
         } else {
@@ -46,11 +47,14 @@ public class UserController {
     }
 
     @PostMapping("/add_user")
-    public ResponseEntity addUser(@RequestBody User newUser) {
-        User userFromDb = userService.findUserByUserName(newUser.getUserName());
+    public ResponseEntity addUser(@RequestBody UserDTO userDTO) {
+
+        User userFromDb = userService.findUserByUserName(userDTO.getUserName());
         if (userFromDb == null) {
-            User addedUser = userService.save(newUser);
-            return ResponseEntity.status(HttpStatus.OK).body(addedUser);
+            User newUser = new User(userDTO.getUserName(),userDTO.getUserType(),
+                    userDTO.getPhoneNr(),userDTO.getEmail());
+         userService.save(newUser);
+            return ResponseEntity.status(HttpStatus.OK).body(userDTO);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This username already exists!");
         }
