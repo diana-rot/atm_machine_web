@@ -3,17 +3,18 @@ package com.atm_machine_web.controller.dto;
 import javax.persistence.Column;
 
 public class NotesDTO {
-    Long noteId;
+
     String type;
     Integer value;
     String currency;
 
-    public Long getNoteId() {
-        return noteId;
-    }
-
-    public void setNoteId(Long noteId) {
-        this.noteId = noteId;
+    @Override
+    public String toString() {
+        return "NotesDTO{" +
+                "type='" + type + '\'' +
+                ", value=" + value +
+                ", currency='" + currency + '\'' +
+                '}';
     }
 
     public String getType() {

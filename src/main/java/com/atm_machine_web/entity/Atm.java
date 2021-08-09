@@ -21,16 +21,25 @@ public class Atm {
     @JoinColumn(name = "stacks")
     List<Stacks> stacks;
 
-    @Column(name = "atm_money",updatable = true)
+    @Column(name = "atm_money", updatable = true)
     Float atmMoney;
 
 
-    public Atm() {
+    public Atm(Float atmMoney) {
 
+        this.stacks = new ArrayList<Stacks>();
+        this.atmMoney = atmMoney;
     }
 
-    public Atm(Float atmMoney) {
+    public Atm(Long atmId, Float atmMoney) {
+
+        this.stacks = new ArrayList<Stacks>();
+        this.atmId = atmId;
         this.atmMoney = atmMoney;
+    }
+
+    public Atm() {
+
     }
 
     public Float getAtmMoney() {
@@ -57,11 +66,14 @@ public class Atm {
         this.stacks = stacks;
     }
 
-
-
-
-
-
+    @Override
+    public String toString() {
+        return "Atm{" +
+                "atmId=" + atmId +
+                ", stacks=" + stacks +
+                ", atmMoney=" + atmMoney +
+                '}';
+    }
 
 
 //    public void showIfAllert(Integer sum) {

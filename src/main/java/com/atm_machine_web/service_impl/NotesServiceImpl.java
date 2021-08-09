@@ -1,7 +1,8 @@
-package com.atm_machine_web.service;
+package com.atm_machine_web.service_impl;
 
 import com.atm_machine_web.model.Notes;
 import com.atm_machine_web.repo.NotesRepository;
+import com.atm_machine_web.service.NotesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

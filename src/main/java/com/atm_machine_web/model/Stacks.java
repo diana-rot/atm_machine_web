@@ -62,9 +62,8 @@ public class Stacks {
     @Override
     public String toString() {
         return "Stacks{" +
-                "stackIdNote=" + stackIdNote +
                 ", count=" + count +
-                ", note=" + note +
-                '}';
+                ", note=" + note.getType() + "with value: " +note.getValue()+
+                '}'+ "\n";
     }
 }
