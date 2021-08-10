@@ -10,6 +10,15 @@ public class WithdrawResponseDTO {
     List<Stacks> stacks;
     Float atmMoney;
     Float sold;
+    String message;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
     public Float getSold() {
         return sold;
@@ -50,5 +59,17 @@ public class WithdrawResponseDTO {
 
     public void setAtmMoney(Float atmMoney) {
         this.atmMoney = atmMoney;
+    }
+
+    @Override
+    public String toString() {
+        return "WithdrawResponseDTO{" +
+                username +  + '\'' +
+                "You have recieved message='" + message + '\'' +
+                ", currency='" + currency + '\'' +
+                ", stacks=" + stacks +
+                ",Money left in atm=" + atmMoney +
+                ", Your current sold=" + sold +
+                '}';
     }
 }

@@ -65,7 +65,7 @@ public class AtmServiceTest {
 
         newStacks = atmService.updateStacks(atm, newStacks, notes, 1);
         when(atmRepository.save(any())).thenReturn(atm);
-        // assertEquals(atm.get);
+
 
     }
 
@@ -96,7 +96,7 @@ public class AtmServiceTest {
         List<Integer> result = new ArrayList<>();
         when(atmRepository.getById(any())).thenReturn(atm);
         atm.setStacks(newStacks);
-        when(atmRepository.save(any())).thenReturn(atm);
+
 
         List<Notes> notes = new ArrayList<Notes>();
         notes.add(new Notes("Leu_100", 100));
@@ -119,7 +119,6 @@ public class AtmServiceTest {
                                 && stack.getNote().getValue() == 10
                                 && stack.getCount() == 3)
         ).isTrue();
-
 
 
     }
@@ -151,7 +150,6 @@ public class AtmServiceTest {
                                 && stack.getNote().getValue() == 100
                                 && stack.getCount() == 1)
         ).isTrue();
-        // System.out.println(newStacks.toString());
 
 
     }

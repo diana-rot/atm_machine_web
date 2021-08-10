@@ -10,9 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class UserController {
@@ -32,6 +30,7 @@ public class UserController {
     AtmService atmService;
     @Autowired
     ModelMapper modelMapper;
+
 
     @PostMapping("/add_account")
     public ResponseEntity addAccount(@RequestBody NewAccountDTO dto) {
@@ -74,21 +73,21 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No account found");
         }
         SoldDTO responseDTO = modelMapper.map(accountsFromDb, SoldDTO.class);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO.toString());
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO.toString());
 
     }
 
-    @PostMapping("/get_all_users")
-    public ResponseEntity show_all_users(@RequestBody UserDTO userDTO) {
+    @GetMapping("/get_all_users/{userName}")
+    public ResponseEntity show_all_users(@PathVariable("userName") String userName) {
 
-        User userFromDb = userService.findUserByUserName(userDTO.getUserName());
+        User userFromDb = userService.findUserByUserName(userName);
 
         if (userFromDb == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user does not exist!");
         }
         if (userFromDb.getUserType().equals("ADMIN")) {
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(userService.findAll());
+            return ResponseEntity.status(HttpStatus.OK).body(userService.findAll());
 
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("If you are not admin you cannot enter");

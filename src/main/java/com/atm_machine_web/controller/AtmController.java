@@ -8,6 +8,7 @@ import com.atm_machine_web.model.Accounts;
 import com.atm_machine_web.model.Notes;
 import com.atm_machine_web.model.Transactions;
 import com.atm_machine_web.model.User;
+import com.atm_machine_web.notification.Notification;
 import com.atm_machine_web.service.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
+
 public class AtmController {
     @Autowired
     Atm atm;
@@ -34,6 +36,8 @@ public class AtmController {
     NotesService notesService;
     @Autowired
     AtmService atmService;
+
+
     @Autowired
     ModelMapper modelMapper;
 
@@ -61,10 +65,10 @@ public class AtmController {
 
     @PostMapping("/withdraw_from_atm")
     public ResponseEntity withdraw(@RequestBody WithdrawDTO dto) {
+
         User owner = userService.findUserByUserName(dto.getUsername());
         Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
         Atm atmFromDb = atmService.findAtmByAtmId(1L);
-
         if (atmFromDb == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This atm  doesn't exist");
         } else {
@@ -72,19 +76,23 @@ public class AtmController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This user doesn't have any account!");
             } else {
                 Float sold = accountsFromDb.getSold();
-                atmService.countWithdraw(atmFromDb, atmFromDb.getStacks(),sold, dto.getSum());
-                accountsFromDb.withdrawFromSold(dto.getSum());
-                accountsFromDb.setSold(sold);
+                atmService.countWithdraw(atmFromDb, atmFromDb.getStacks(), sold, dto.getSum());
+                Float newSold = accountsFromDb.withdrawFromSold(dto.getSum());
+                accountsFromDb.setSold(newSold);
+
                 WithdrawResponseDTO responseDTO = modelMapper.map(atmFromDb, WithdrawResponseDTO.class);
-                dto.setUsername(responseDTO.getUsername());
-                dto.setCurrency(responseDTO.getCurrency());
+                responseDTO.setUsername(dto.getUsername());
+                responseDTO.setCurrency(dto.getCurrency());
+                responseDTO.setSold(newSold);
+
+                Notification not = atmService.showIfAlert(dto.getSum(),atmFromDb.getStacks(),atmFromDb.getAtmMoney());
+                responseDTO.setMessage(not.getNotificationMessage());
+
                 Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
                 transactionsService.save(newTransaction);
 
                 return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-//                } else {
-//                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient funds! Check your sold");
-                //    }
+
 
             }
 
@@ -93,6 +101,7 @@ public class AtmController {
 
     @GetMapping("/show_balance_atm")
     public ResponseEntity showAtmBalance() {
+
         Atm atmFromDb = atmService.findAtmByAtmId(1L);
         if (atmFromDb == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This atm  doesn't exist");
@@ -100,10 +109,10 @@ public class AtmController {
             return ResponseEntity.status(HttpStatus.OK).body(atmFromDb.getStacks().toString());
         }
 
-
     }
 
-    @GetMapping("/show_stacks")
+    @GetMapping("/show_stacks/")
+
     public String showStacks(@RequestBody Notes newNote) {
         return stacksService.findAllByNote(newNote).toString();
     }
