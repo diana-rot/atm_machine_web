@@ -13,11 +13,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface TransactionsRepository extends JpaRepository<Transactions,Long> {
+public interface TransactionsRepository extends JpaRepository<Transactions, Long> {
     Transactions findFirstTransactionsByAccountId(Accounts accountId);
-Transactions findTransactionsByDate(LocalDate date);
-List<Transactions>  findTransactionsByAccountIdOrderByTransactionId(Accounts accountId);
 
+    Transactions findTransactionsByDate(LocalDate date);
+
+    List<Transactions> findTransactionsByAccountIdOrderByTransactionId(Accounts accountId);
 
 
 }

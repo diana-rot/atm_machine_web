@@ -8,4 +8,5 @@ import java.util.List;
 public interface StacksService {
     Integer findCountByNote(Notes note);
     List<Stacks> findAllByNote(Notes note);
+
 }

@@ -1,13 +1,15 @@
-package com.atm_machine_web.service;
+package com.atm_machine_web.service_impl;
 
 import com.atm_machine_web.model.Accounts;
 import com.atm_machine_web.model.User;
 import com.atm_machine_web.repo.AccountsRepository;
+import com.atm_machine_web.service.AccountsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 @Service
-public class AccountsServiceImpl implements AccountsService {
+public  class AccountsServiceImpl implements AccountsService {
     @Autowired
     AccountsRepository accountsRepository;
 
@@ -17,13 +19,19 @@ public class AccountsServiceImpl implements AccountsService {
     }
 
 
-
     @Override
     public Accounts findAccountsByAccountId(Long accountId) {
         return accountsRepository.findAccountsByAccountId(accountId);
     }
 
+    @Override
+    public void updateSold(Integer noteValue, Integer Nrnotes, Accounts accountsFromDb) {
 
+        Float sold = accountsFromDb.getSold();
+        sold = sold + noteValue * Nrnotes;
+        accountsFromDb.setSold(sold);
+
+    }
 
     @Override
     public Float findSoldByAccountId(Long accountId) {

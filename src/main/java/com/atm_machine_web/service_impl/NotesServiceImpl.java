@@ -1,7 +1,8 @@
-package com.atm_machine_web.service;
+package com.atm_machine_web.service_impl;
 
 import com.atm_machine_web.model.Notes;
 import com.atm_machine_web.repo.NotesRepository;
+import com.atm_machine_web.service.NotesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +14,18 @@ public class NotesServiceImpl implements NotesService {
     NotesRepository notesRepository;
 
     @Override
-    public Notes findValueByType(String type) {
+    public Integer findValueByType(String type) {
         return notesRepository.findValueByType(type);
     }
 
     @Override
     public List<Notes> findAll() {
         return notesRepository.findAll();
+    }
+
+    @Override
+    public Notes findNotesByType(String noteType) {
+        return notesRepository.findNotesByType(noteType);
     }
 
 }

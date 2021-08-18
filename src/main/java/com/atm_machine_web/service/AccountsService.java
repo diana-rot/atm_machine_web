@@ -8,11 +8,14 @@ public interface AccountsService {
 
 
     Accounts findAccountsByAccountId(Long accountId);
+
+    void updateSold(Integer noteValue, Integer Nrnotes, Accounts accountsFromDb);
+
     Float findSoldByAccountId(Long accountId);
+
     Accounts save(Accounts newAccount);
+
     Accounts findAccountsByOwner(User owner);
-
-
 
 
 }
