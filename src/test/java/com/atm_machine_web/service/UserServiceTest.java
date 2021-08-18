@@ -3,18 +3,10 @@ package com.atm_machine_web.service;
 import com.atm_machine_web.model.User;
 import com.atm_machine_web.repo.AtmRepository;
 import com.atm_machine_web.repo.UserRepository;
-import com.atm_machine_web.service_impl.UserServiceImpl;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+import com.atm_machine_web.serviceImplementation.UserServiceImpl;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;

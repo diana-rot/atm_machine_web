@@ -5,8 +5,6 @@ import com.atm_machine_web.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface AccountsRepository extends JpaRepository<Accounts, Long> {
     Accounts findAccountsByOwner(User owner);
@@ -15,5 +13,6 @@ public interface AccountsRepository extends JpaRepository<Accounts, Long> {
 
     Float findSoldByAccountId(Long accountId);
 
+    Accounts findAccountsByOwnerAndCurrencyType(User owner, String currencyType);
 }
 

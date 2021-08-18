@@ -1,4 +1,4 @@
-package com.atm_machine_web.service_impl;
+package com.atm_machine_web.serviceImplementation;
 
 import com.atm_machine_web.entity.Atm;
 import com.atm_machine_web.model.Notes;

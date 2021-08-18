@@ -2,11 +2,11 @@ package com.atm_machine_web.model;
 
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.*;
 
 @Entity
-public class Transactions {
+public class Transactions implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

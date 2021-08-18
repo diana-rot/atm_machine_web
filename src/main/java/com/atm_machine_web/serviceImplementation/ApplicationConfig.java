@@ -1,4 +1,4 @@
-package com.atm_machine_web.service_impl;
+package com.atm_machine_web.serviceImplementation;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

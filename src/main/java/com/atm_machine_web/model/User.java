@@ -1,7 +1,8 @@
 package com.atm_machine_web.model;
 
 import javax.persistence.*;
-import java.util.List;
+import java.io.Serializable;
+
 @Entity(name = "User")
 @Table(
         name = "user",
@@ -10,7 +11,7 @@ import java.util.List;
         , columnNames = "email")
         }
 )
-public class User {
+public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long userId;
@@ -18,7 +19,7 @@ public class User {
     private String userName;
     @Column(name = "type_user", nullable = false, unique = true)
     private String userType;
-    @Column(name = "phoneNr", nullable = false, unique = true)
+    @Column(name = "phoneNr", nullable = false, unique = false)
     private String phoneNr;
     @Column(name = "email",  nullable = false)
     private String email;
@@ -30,6 +31,7 @@ public class User {
         this.phoneNr = phoneNr;
         this.email = email;
     }
+
 
     public User() {
 

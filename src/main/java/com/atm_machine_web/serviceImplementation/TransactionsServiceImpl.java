@@ -1,15 +1,12 @@
-package com.atm_machine_web.service_impl;
+package com.atm_machine_web.serviceImplementation;
 
 import com.atm_machine_web.model.Accounts;
-import com.atm_machine_web.model.Notes;
-import com.atm_machine_web.model.Stacks;
 import com.atm_machine_web.model.Transactions;
 import com.atm_machine_web.repo.TransactionsRepository;
 import com.atm_machine_web.service.TransactionsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 

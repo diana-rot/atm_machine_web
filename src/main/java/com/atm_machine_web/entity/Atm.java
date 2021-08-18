@@ -1,15 +1,17 @@
 package com.atm_machine_web.entity;
 
+
 import com.atm_machine_web.model.Stacks;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 @Entity(name = "Atm")
-public class Atm {
+public class Atm implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long atmId;

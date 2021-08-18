@@ -1,11 +1,12 @@
 package com.atm_machine_web.controller;
 
-import com.atm_machine_web.controller.dto.*;
+import com.atm_machine_web.controller.dto.NewAccountDTO;
+import com.atm_machine_web.controller.dto.SoldDTO;
+import com.atm_machine_web.controller.dto.UserDTO;
 import com.atm_machine_web.entity.Atm;
 import com.atm_machine_web.model.Accounts;
 import com.atm_machine_web.model.User;
 import com.atm_machine_web.service.*;
-import com.atm_machine_web.service.AtmService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/user")
 public class UserController {
     @Autowired
     Atm atm;
@@ -30,37 +32,6 @@ public class UserController {
     AtmService atmService;
     @Autowired
     ModelMapper modelMapper;
-
-
-    @PostMapping("/add_account")
-    public ResponseEntity addAccount(@RequestBody NewAccountDTO dto) {
-        User owner = userService.findUserByUserName(dto.getUserName());
-        Accounts accountsFromDb = accountsService.findAccountsByOwner(owner);
-        if (accountsFromDb == null) {
-            Accounts newAccount = new Accounts(owner, dto.getSold(), dto.getCurrencyType());
-            accountsService.save(newAccount);
-            NewAccountDTO responseDTO = modelMapper.map(newAccount, NewAccountDTO.class);
-            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This account already exists!");
-        }
-    }
-
-    @PostMapping("/add_user")
-    public ResponseEntity addUser(@RequestBody UserDTO userDTO) {
-
-        User userFromDb = userService.findUserByUserName(userDTO.getUserName());
-        if (userFromDb == null) {
-            User newUser = new User(userDTO.getUserName(), userDTO.getUserType(),
-                    userDTO.getPhoneNr(), userDTO.getEmail());
-            userService.save(newUser);
-            return ResponseEntity.status(HttpStatus.OK).body(userDTO);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This username already exists!");
-        }
-    }
-
-
     @PostMapping("/interrogate_sold")
     public ResponseEntity interrogateSold(@RequestBody UserDTO userDTO) {
 
@@ -76,9 +47,11 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO.toString());
 
     }
+//de modificat name -ingul
 
-    @GetMapping("/get_all_users/{userName}")
-    public ResponseEntity show_all_users(@PathVariable("userName") String userName) {
+
+    @GetMapping("/all/{userName}")
+    public ResponseEntity getAllUsers(@PathVariable("userName") String userName) {
 
         User userFromDb = userService.findUserByUserName(userName);
 
@@ -95,4 +68,35 @@ public class UserController {
 
 
     }
+    @PostMapping("/add_user")
+    public ResponseEntity addUser(@RequestBody UserDTO userDTO) {
+
+        User userFromDb = userService.findUserByUserName(userDTO.getUserName());
+        if (userFromDb == null) {
+            User newUser = new User(userDTO.getUserName(), userDTO.getUserType(),
+                    userDTO.getPhoneNr(), userDTO.getEmail());
+            userService.save(newUser);
+            return ResponseEntity.status(HttpStatus.OK).body(userDTO);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This username already exists!");
+        }
+    }
+
+
+    @PostMapping("/add_account")
+    public ResponseEntity addAccount(@RequestBody NewAccountDTO dto) {
+        User owner = userService.findUserByUserName(dto.getUserName());
+        Accounts accountsFromDb = accountsService.findAccountsByOwnerAndCurrencyType(owner,dto.getCurrencyType());
+        if (accountsFromDb == null) {
+            Accounts newAccount = new Accounts(owner, dto.getSold(), dto.getCurrencyType());
+            accountsService.save(newAccount);
+            NewAccountDTO responseDTO = modelMapper.map(newAccount, NewAccountDTO.class);
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This account already exists!");
+        }
+    }
+
+
+
 }

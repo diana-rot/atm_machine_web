@@ -1,10 +1,10 @@
 package com.atm_machine_web.model;
 import javax.persistence.*;
-
+import java.io.Serializable;
 
 
 @Entity(name = "Notes")
-public class Notes {
+public class Notes implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(

@@ -7,7 +7,7 @@ import com.atm_machine_web.entity.Atm;
 import com.atm_machine_web.model.Notes;
 import com.atm_machine_web.model.Stacks;
 import com.atm_machine_web.service.AtmServiceTest;
-import com.atm_machine_web.service_impl.AtmServiceImpl;
+import com.atm_machine_web.serviceImplementation.AtmServiceImpl;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -93,10 +93,10 @@ public class IntegrationAtmMockTest {
 
         AtmDTO response =
                 RestAssured.given()
-                        .contentType("application/json;")
-                        .post("http://localhost:8080/refill_stacks_atm?nrNotes=1")
-                        .then().statusCode(200)
-                        .extract().as(AtmDTO.class);
+                                .contentType("application/json;")
+                                .post("http://localhost:8080/refill_stacks_atm?nrNotes=1")
+                            .then().statusCode(200)
+                                .extract().as(AtmDTO.class);
 
         Atm actual = modelMapper.map(response, Atm.class);
         String username = new String("Diana");

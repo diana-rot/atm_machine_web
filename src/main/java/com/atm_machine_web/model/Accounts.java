@@ -1,12 +1,12 @@
 package com.atm_machine_web.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Entity(name = "Accounts")
-public class Accounts {
+public class Accounts implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long accountId;

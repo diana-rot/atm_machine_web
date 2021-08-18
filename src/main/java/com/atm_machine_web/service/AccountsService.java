@@ -15,7 +15,8 @@ public interface AccountsService {
 
     Accounts save(Accounts newAccount);
 
-    Accounts findAccountsByOwner(User owner);
+    Accounts findAccountsByOwnerAndCurrencyType(User owner, String currencyType);
 
+    Accounts findAccountsByOwner(User owner);
 
 }

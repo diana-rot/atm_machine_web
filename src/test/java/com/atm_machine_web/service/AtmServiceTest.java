@@ -4,7 +4,7 @@ import com.atm_machine_web.entity.Atm;
 import com.atm_machine_web.model.Notes;
 import com.atm_machine_web.model.Stacks;
 import com.atm_machine_web.repo.AtmRepository;
-import com.atm_machine_web.service_impl.AtmServiceImpl;
+import com.atm_machine_web.serviceImplementation.AtmServiceImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

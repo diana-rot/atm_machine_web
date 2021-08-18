@@ -85,7 +85,7 @@ public class AtmController {
                 responseDTO.setCurrency(dto.getCurrency());
                 responseDTO.setSold(newSold);
 
-                Notification not = atmService.showIfAlert(dto.getSum(),atmFromDb.getStacks(),atmFromDb.getAtmMoney());
+                Notification not = atmService.showIfAlert(dto.getSum(), atmFromDb.getStacks(), atmFromDb.getAtmMoney());
                 responseDTO.setMessage(not.getNotificationMessage());
 
                 Transactions newTransaction = new Transactions(accountsFromDb, LocalDate.now(), accountsFromDb.getSold());
